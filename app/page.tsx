@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 
 export default function HomePage() {
   useEffect(() => {
+    console.log('CodeSense AI Landing Page Loaded')
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

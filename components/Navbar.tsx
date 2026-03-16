@@ -44,9 +44,14 @@ export default function Navbar() {
 
         {/* CENTER — Badge & Nav links */}
         <div className="hidden md:flex items-center gap-8">
-          <span className="flex items-center gap-2 border border-[rgba(0,229,160,0.2)] text-[#00e5a0] text-[10px] tracking-[2px] uppercase px-3 py-1.5 rounded-full">
-            POWERED BY GEMINI 1.5 PRO
-          </span>
+          <div className="hidden md:flex items-center gap-1.5 
+ border border-[rgba(0,229,160,0.25)] text-[#00e5a0] 
+ text-[10px] tracking-[2px] uppercase px-3 py-1.5 
+ rounded-full bg-[rgba(0,229,160,0.05)]"> 
+   <span className="w-1.5 h-1.5 rounded-full 
+   bg-[#00e5a0] animate-pulse" /> 
+   v1.0 BETA 
+ </div> 
           <div className="flex gap-6">
             <Link href="/demo" className="text-sm text-[#6b7a8d] hover:text-white transition font-mono">
               Demo

@@ -1,6 +1,4 @@
-@tailwind base; 
-@tailwind components; 
-@tailwind utilities; 
+@import "tailwindcss";
   
 :root { 
   --accent: #00e5a0; 
@@ -27,3 +25,8 @@ html { scroll-behavior: smooth; }
   opacity: 1; 
   transform: translateY(0); 
 } 
+
+@keyframes slide { 
+  0% { transform: translateX(-100%); width: 60%; } 
+  100% { transform: translateX(200%); width: 60%; } 
+}
