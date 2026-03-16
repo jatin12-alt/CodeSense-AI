@@ -52,14 +52,14 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-display font-bold mb-4 text-[#00e5a0]">5. Limitations of Liability</h2>
             <div className="space-y-4 text-[#e8edf3]/80 leading-relaxed text-sm">
-              <p>CodeSense AI is provided "as is" without any warranties. In no event shall we be liable for any indirect, incidental, special, or consequential damages resulting from your use of the service.</p>
+              <p>CodeSense AI is provided &quot;as is&quot; without any warranties. In no event shall we be liable for any indirect, incidental, special, or consequential damages resulting from your use of the service.</p>
             </div>
           </section>
 
           <section>
             <h2 className="text-xl font-display font-bold mb-4 text-[#00e5a0]">6. Changes to Terms</h2>
             <div className="space-y-4 text-[#e8edf3]/80 leading-relaxed text-sm">
-              <p>We reserve the right to modify these Terms of Service at any time. We will notify you of any changes by posting the new terms on this page and updating the "Last updated" date.</p>
+              <p>We reserve the right to modify these Terms of Service at any time. We will notify you of any changes by posting the new terms on this page and updating the &quot;Last updated&quot; date.</p>
             </div>
           </section>
 

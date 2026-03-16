@@ -31,7 +31,7 @@ export default function ContactPage() {
             <div>
               <h1 className="font-display font-bold text-5xl mb-6">Get In Touch</h1>
               <p className="text-[#6b7a8d] text-lg font-mono max-w-sm leading-relaxed">
-                Have questions about CodeSense AI? We'd love to hear from you.
+                Have questions about CodeSense AI? We&apos;d love to hear from you.
               </p>
             </div>
 
@@ -100,7 +100,7 @@ export default function ContactPage() {
                 <div className="text-5xl mb-6">✅</div>
                 <h3 className="font-display font-bold text-2xl mb-4 text-[#e8edf3]">Message Sent!</h3>
                 <p className="text-[#6b7a8d] text-base font-mono max-w-xs mx-auto">
-                  Thanks for reaching out! We'll get back to you as soon as possible.
+                  Thanks for reaching out! We&apos;ll get back to you as soon as possible.
                 </p>
                 <Button 
                   onClick={() => setSubmitted(false)}

@@ -6,7 +6,6 @@ import { Github, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -19,7 +18,6 @@ export default function Navbar() {
         } else {
           setIsVisible(true)
         }
-        setIsScrolled(window.scrollY > 20)
         setLastScrollY(window.scrollY)
       }
     }

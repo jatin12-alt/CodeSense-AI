@@ -12,7 +12,7 @@ export default function AboutPage() {
           <span className="text-[10px] tracking-[3px] text-[#00e5a0] uppercase font-mono mb-3 block">ABOUT US</span>
           <h1 className="font-display font-bold text-5xl mb-6 text-[#e8edf3]">Our Mission</h1>
           <p className="text-[#6b7a8d] text-lg font-mono max-w-2xl mx-auto leading-relaxed">
-            We're building the most advanced AI platform for codebase intelligence, helping developers understand complex systems in seconds.
+            We&apos;re building the most advanced AI platform for codebase intelligence, helping developers understand complex systems in seconds.
           </p>
         </div>
 
@@ -26,7 +26,7 @@ export default function AboutPage() {
           <div className="bg-[#0f1520] border border-[rgba(255,255,255,0.07)] rounded-2xl p-8">
             <h2 className="font-display font-bold text-2xl mb-4 text-[#00aaff]">The Solution</h2>
             <p className="text-[#6b7a8d] font-mono leading-relaxed text-sm">
-              CodeSense AI uses Retrieval-Augmented Generation (RAG) to bridge the gap. By indexing your entire repository and using Gemini 1.5 Pro's massive context window, we provide answers that are accurate, contextual, and actionable.
+              CodeSense AI uses Retrieval-Augmented Generation (RAG) to bridge the gap. By indexing your entire repository and using Gemini 1.5 Pro&apos;s massive context window, we provide answers that are accurate, contextual, and actionable.
             </p>
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function AboutPage() {
           <section>
             <h2 className="font-display font-bold text-2xl mb-4 text-[#e8edf3]">Why CodeSense AI?</h2>
             <p className="leading-relaxed mb-6">
-              Unlike traditional documentation which is often outdated the moment it's written, CodeSense AI is always in sync with your latest commit. We don't just search for text; we understand the semantics of your code.
+              Unlike traditional documentation which is often outdated the moment it&apos;s written, CodeSense AI is always in sync with your latest commit. We don&apos;t just search for text; we understand the semantics of your code.
             </p>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <li className="flex gap-3 text-sm">
