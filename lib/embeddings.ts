@@ -1,21 +1,18 @@
-export async function generateEmbedding( 
-  text: string 
-): Promise<number[]> { 
-  const response = await fetch( 
-    `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${process.env.GEMINI_API_KEY}`, 
-    { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify({ 
-        model: 'models/text-embedding-004', 
-        content: { parts: [{ text }] }, 
-      }), 
-    } 
-  ) 
-  const data = await response.json() 
-  return data.embedding.values 
-} 
-  
+import { GoogleGenerativeAI } from '@google/generative-ai'
+
+export async function generateEmbedding(
+  text: string
+): Promise<number[]> {
+  const genAI = new GoogleGenerativeAI(
+    process.env.GEMINI_API_KEY!
+  )
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-embedding-001'
+  })
+  const result = await model.embedContent(text)
+  return result.embedding.values
+}
+
 export function chunkText( 
   text: string, 
   chunkSize = 500 

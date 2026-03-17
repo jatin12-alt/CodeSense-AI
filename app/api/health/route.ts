@@ -6,6 +6,11 @@ import { analyzeCodeHealth } from '@/lib/gemini'
 import { neon } from '@neondatabase/serverless'
 import { desc, eq } from 'drizzle-orm'
 
+type HealthChunkRow = {
+  file_path: string
+  content: string
+}
+
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -26,7 +31,7 @@ export async function POST(req: NextRequest) {
     const sql = neon(process.env.DATABASE_URL!)
 
     // Fetch all file chunks for this repo
-    const allChunks = await sql`
+    const allChunks = await sql<HealthChunkRow>`
       SELECT DISTINCT ON (file_path) 
         file_path, content
       FROM embeddings
@@ -41,7 +46,7 @@ export async function POST(req: NextRequest) {
       }, { status: 400 })
     }
 
-    const files = allChunks.map((c: any) => ({ 
+    const files = allChunks.map((c) => ({ 
       path: c.file_path, 
       content: c.content 
     }))
@@ -66,10 +71,13 @@ export async function POST(req: NextRequest) {
       reportId: report[0].id
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Health error:', error)
     return NextResponse.json(
-      { error: error.message || 'Health analysis failed' }, 
+      {
+        error:
+          error instanceof Error ? error.message : 'Health analysis failed',
+      },
       { status: 500 }
     )
   }
@@ -105,9 +113,13 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ report: report[0] })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { error: error.message }, { status: 500 }
+      {
+        error:
+          error instanceof Error ? error.message : 'Failed to load health report',
+      },
+      { status: 500 }
     )
   }
 }

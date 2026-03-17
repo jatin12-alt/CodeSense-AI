@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useUser } from '@clerk/nextjs'
@@ -60,11 +60,9 @@ function simpleMarkdownToHtml(md: string) {
   return html
 }
 
-export default function RepoOverviewPage({
-  params,
-}: {
-  params: { repoId: string }
-}) {
+export default function RepoOverviewPage() {
+  const params = useParams()
+  const repoId = (params?.repoId ?? '') as string
   const router = useRouter()
   const { isLoaded, isSignedIn } = useUser()
   const [repo, setRepo] = useState<Repo | null>(null)
@@ -77,11 +75,11 @@ export default function RepoOverviewPage({
   const canInteract = isLoaded && isSignedIn
 
   const fetchRepo = useCallback(async () => {
-    if (!canInteract) return
+    if (!canInteract || !repoId) return
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/repos/${params.repoId}`)
+      const res = await fetch(`/api/repos/${repoId}`)
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as { error?: string } | null
         throw new Error(body?.error || `Failed to fetch repo (${res.status})`)
@@ -95,7 +93,7 @@ export default function RepoOverviewPage({
     } finally {
       setLoading(false)
     }
-  }, [canInteract, params.repoId])
+  }, [canInteract, repoId])
 
   useEffect(() => {
     if (!isLoaded) return
@@ -137,25 +135,32 @@ export default function RepoOverviewPage({
     }
   }, [onboardingLoading, repo?.repoUrl])
 
-  const cards = [
+  const cards: {
+    title: string
+    description: string
+    href: string
+    Icon: typeof MessageSquare
+    color: string
+    onClick?: () => void
+  }[] = [
     {
       title: 'Chat with Codebase',
       description: 'Ask questions and get grounded answers from indexed code.',
-      href: `/repo/${params.repoId}/chat`,
+      href: repoId ? `/repo/${repoId}/chat` : '',
       Icon: MessageSquare,
       color: '#00aaff',
     },
     {
       title: 'PR Code Review',
       description: 'Paste diffs or snippets and get senior-level feedback.',
-      href: `/repo/${params.repoId}/review`,
+      href: repoId ? `/repo/${repoId}/review` : '',
       Icon: GitPullRequest,
       color: '#00e5a0',
     },
     {
       title: 'Code Health',
       description: 'Get a health score with actionable refactor suggestions.',
-      href: `/repo/${params.repoId}/health`,
+      href: repoId ? `/repo/${repoId}/health` : '',
       Icon: Activity,
       color: '#a855f7',
     },
@@ -266,10 +271,10 @@ export default function RepoOverviewPage({
 
           {/* Feature cards */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
-            {cards.map((c) => {
+          {cards.map((c) => {
               const Icon = c.Icon
-              const clickable = Boolean(c.href) || Boolean((c as any).onClick)
-              const onClick = (c as any).onClick as undefined | (() => void)
+              const clickable = Boolean(c.href) || Boolean(c.onClick)
+              const onClick = c.onClick
 
               return (
                 <button

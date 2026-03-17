@@ -7,6 +7,12 @@ import { generateEmbedding } from '@/lib/embeddings'
 import { neon } from '@neondatabase/serverless'
 import { eq } from 'drizzle-orm'
 
+type SimilarChunkRow = {
+  content: string
+  file_path: string
+  similarity: number
+}
+
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -32,7 +38,7 @@ export async function POST(req: NextRequest) {
     const vectorStr = `[${questionEmbedding.join(',')}]`
 
     // Step 2 — Similarity search in pgvector
-    const similarChunks = await sql`
+    const similarChunks = await sql<SimilarChunkRow>`
       SELECT content, file_path,
         1 - (embedding <=> ${vectorStr}::vector) as similarity
       FROM embeddings
@@ -48,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 3 — Build context from chunks
-    const contextChunks = similarChunks.map((chunk: any) => 
+    const contextChunks = similarChunks.map((chunk) => 
       `File: ${chunk.file_path}\n\n${chunk.content}`
     )
 
@@ -67,14 +73,17 @@ export async function POST(req: NextRequest) {
       answer,
     })
 
-    return NextResponse.json({ answer, sources: similarChunks.map(
-      (c: any) => c.file_path
-    )})
+    return NextResponse.json({
+      answer,
+      sources: similarChunks.map((c) => c.file_path),
+    })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Chat error:', error)
     return NextResponse.json(
-      { error: error.message || 'Chat failed' }, 
+      {
+        error: error instanceof Error ? error.message : 'Chat failed',
+      },
       { status: 500 }
     )
   }
@@ -106,9 +115,13 @@ export async function GET(req: NextRequest) {
       .limit(50)
 
     return NextResponse.json({ history })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { error: error.message }, { status: 500 }
+      {
+        error:
+          error instanceof Error ? error.message : 'Failed to load chat history',
+      },
+      { status: 500 }
     )
   }
 }

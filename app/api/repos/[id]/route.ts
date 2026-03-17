@@ -7,14 +7,14 @@ import { neon } from '@neondatabase/serverless'
 
 export async function GET(
   _req: NextRequest,
-  ctx: { params: Promise<{ id: string }> | { id: string } }
+  ctx: { params: Promise<{ id: string }> }
 ) {
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const params = await Promise.resolve(ctx.params)
+  const params = await ctx.params
   const id = params.id
 
   if (!id) {
@@ -41,14 +41,14 @@ export async function GET(
 
 export async function DELETE(
   _req: NextRequest,
-  ctx: { params: Promise<{ id: string }> | { id: string } }
+  ctx: { params: Promise<{ id: string }> }
 ) {
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const params = await Promise.resolve(ctx.params)
+  const params = await ctx.params
   const id = params.id
 
   if (!id) {

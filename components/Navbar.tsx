@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useAuth, UserButton } from '@clerk/nextjs'
 import { Github, Menu, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 export default function Navbar() {
+  const { isSignedIn } = useAuth()
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -42,16 +43,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* CENTER — Badge & Nav links */}
+        {/* CENTER — Nav links */}
         <div className="hidden md:flex items-center gap-8">
-          <div className="hidden md:flex items-center gap-1.5 
- border border-[rgba(0,229,160,0.25)] text-[#00e5a0] 
- text-[10px] tracking-[2px] uppercase px-3 py-1.5 
- rounded-full bg-[rgba(0,229,160,0.05)]"> 
-   <span className="w-1.5 h-1.5 rounded-full 
-   bg-[#00e5a0] animate-pulse" /> 
-   v1.0 BETA 
- </div> 
           <div className="flex gap-6">
             <Link href="/demo" className="text-sm text-[#6b7a8d] hover:text-white transition font-mono">
               Demo
@@ -72,19 +65,36 @@ export default function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#6b7a8d] hover:text-white transition"
+            aria-label="Open GitHub repository"
           >
             <Github size={18} />
           </a>
-          <Link href="/sign-in">
-            <Button variant="ghost" size="sm">
-              Sign In
-            </Button>
-          </Link>
-          <Link href="/sign-up">
-            <Button size="sm">
-              Get Started
-            </Button>
-          </Link>
+          {isSignedIn && (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center rounded-lg font-mono text-xs font-medium transition-colors text-[#6b7a8d] hover:text-white h-8 px-3"
+            >
+              Dashboard
+            </Link>
+          )}
+          {isSignedIn ? (
+            <UserButton />
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className="inline-flex items-center justify-center rounded-lg font-mono text-xs font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 bg-transparent text-[#6b7a8d] hover:text-white h-8 px-3"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/sign-up"
+                className="inline-flex items-center justify-center rounded-lg font-mono text-xs font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 bg-[#00e5a0] text-black hover:bg-[#00ffb3] h-8 px-3"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
 
         {/* MOBILE — Hamburger */}
@@ -111,16 +121,35 @@ export default function Navbar() {
             How It Works
           </Link>
           <div className="border-t border-[rgba(255,255,255,0.07)] pt-4 flex flex-col gap-3">
-            <Link href="/sign-in" className="w-full">
-              <Button variant="ghost" size="sm" className="w-full justify-center">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/sign-up" className="w-full">
-              <Button size="sm" className="w-full justify-center">
-                Get Started
-              </Button>
-            </Link>
+            {isSignedIn ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="w-full inline-flex items-center justify-center rounded-lg font-mono text-sm font-medium transition-colors bg-transparent text-[#e8edf3] border border-[rgba(255,255,255,0.10)] hover:bg-[rgba(255,255,255,0.05)] h-10 px-4"
+                >
+                  Dashboard
+                </Link>
+                <div className="flex items-center justify-between">
+                  <div className="font-mono text-xs text-[#6b7a8d]">Account</div>
+                  <UserButton />
+                </div>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="w-full inline-flex items-center justify-center rounded-lg font-mono text-sm font-medium transition-colors bg-transparent text-[#e8edf3] border border-[rgba(255,255,255,0.10)] hover:bg-[rgba(255,255,255,0.05)] h-10 px-4"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="w-full inline-flex items-center justify-center rounded-lg font-mono text-sm font-medium transition-colors bg-[#00e5a0] text-black hover:bg-[#00ffb3] h-10 px-4"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

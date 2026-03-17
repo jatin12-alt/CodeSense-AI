@@ -22,8 +22,14 @@ export async function POST(req: NextRequest) {
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
     async start(controller) {
-      const send = (progress: number, message: string, data?: any) => {
-        const payload = JSON.stringify({ progress, message, ...data })
+      const send = (
+        progress: number,
+        message: string,
+        data?: Record<string, unknown>,
+      ) => {
+        const payload = JSON.stringify(
+          data ? { progress, message, ...data } : { progress, message },
+        )
         controller.enqueue(encoder.encode(`data: ${payload}\n\n`))
       }
 
@@ -132,10 +138,12 @@ export async function POST(req: NextRequest) {
         send(100, 'Repository indexed successfully!', { repoId })
         controller.close()
 
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'Indexing failed'
         const errorMsg = JSON.stringify({ 
           progress: -1, 
-          message: error.message || 'Indexing failed',
+          message,
           error: true 
         })
         controller.enqueue(

@@ -46,3 +46,14 @@ export const healthReports = pgTable('health_reports', {
   suggestions: jsonb('suggestions'), 
   createdAt: timestamp('created_at').defaultNow(), 
 }) 
+
+export const embeddings = pgTable('embeddings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  repoId: uuid('repo_id').notNull(),
+  filePath: text('file_path').notNull(),
+  chunkIndex: integer('chunk_index').notNull(),
+  content: text('content').notNull(),
+  // vector column drizzle se nahi hoga, 
+  // raw SQL se banayenge
+  createdAt: timestamp('created_at').defaultNow(),
+})

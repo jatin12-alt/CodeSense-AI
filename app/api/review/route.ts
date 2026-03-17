@@ -7,6 +7,11 @@ import { generateEmbedding } from '@/lib/embeddings'
 import { neon } from '@neondatabase/serverless'
 import { eq } from 'drizzle-orm'
 
+type ReviewContextRow = {
+  content: string
+  file_path: string
+}
+
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -31,7 +36,7 @@ export async function POST(req: NextRequest) {
     const codeEmbedding = await generateEmbedding(codeSnippet)
     const vectorStr = `[${codeEmbedding.join(',')}]`
 
-    const contextChunks = await sql`
+    const contextChunks = await sql<ReviewContextRow>`
       SELECT content, file_path
       FROM embeddings
       WHERE repo_id = ${repoId}::uuid
@@ -40,7 +45,7 @@ export async function POST(req: NextRequest) {
     `
 
     const context = contextChunks
-      .map((c: any) => `File: ${c.file_path}\n${c.content}`)
+      .map((c) => `File: ${c.file_path}\n${c.content}`)
       .join('\n\n---\n\n')
 
     // Get AI review
@@ -57,10 +62,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ review: reviewContent })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Review error:', error)
     return NextResponse.json(
-      { error: error.message || 'Review failed' }, 
+      {
+        error:
+          error instanceof Error ? error.message : 'Review failed',
+      },
       { status: 500 }
     )
   }
@@ -92,9 +100,13 @@ export async function GET(req: NextRequest) {
       .limit(20)
 
     return NextResponse.json({ history })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { error: error.message }, { status: 500 }
+      {
+        error:
+          error instanceof Error ? error.message : 'Failed to load review history',
+      },
+      { status: 500 }
     )
   }
 }

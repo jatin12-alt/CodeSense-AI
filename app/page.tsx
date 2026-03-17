@@ -2,10 +2,14 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@clerk/nextjs'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
 export default function HomePage() {
+  const { isSignedIn } = useAuth()
+  const ctaHref = isSignedIn ? '/dashboard' : '/sign-up'
+
   useEffect(() => {
     console.log('CodeSense AI Landing Page Loaded')
     const observer = new IntersectionObserver(
@@ -68,7 +72,7 @@ export default function HomePage() {
               style={{ animationDelay: '0s' }}
             >
               <span className="w-1.5 h-1.5 bg-[#00e5a0] rounded-full animate-pulse" />
-              NOW AVAILABLE — FREE TO USE
+              v1.0 BETA
             </div>
 
             <h1 className="fade-up font-display font-extrabold tracking-tight leading-[1.05] mb-6" style={{ fontSize: 'clamp(2.8rem, 7vw, 5.5rem)' }}>
@@ -89,11 +93,20 @@ export default function HomePage() {
             </p>
 
             <div className="fade-up flex gap-4 justify-center flex-wrap">
-              <Link href="/sign-up">
-                <button className="bg-[#00e5a0] text-black font-mono font-medium px-8 py-3 rounded-lg hover:bg-[#00ffb3] hover:-translate-y-0.5 transition-all duration-200 shadow-[0_0_0_0_rgba(0,229,160,0)] hover:shadow-[0_12px_40px_rgba(0,229,160,0.25)]">
-                  Analyze a Repo →
-                </button>
+              <Link
+                href={ctaHref}
+                className="bg-[#00e5a0] text-black font-mono font-medium px-8 py-3 rounded-lg hover:bg-[#00ffb3] hover:-translate-y-0.5 transition-all duration-200 shadow-[0_0_0_0_rgba(0,229,160,0)] hover:shadow-[0_12px_40px_rgba(0,229,160,0.25)]"
+              >
+                Analyze a Repo →
               </Link>
+              {!isSignedIn && (
+                <Link
+                  href="/sign-in"
+                  className="bg-transparent border border-[rgba(255,255,255,0.1)] text-[#e8edf3] font-mono font-medium px-8 py-3 rounded-lg hover:bg-[rgba(255,255,255,0.05)] transition-all duration-200"
+                >
+                  Sign In
+                </Link>
+              )}
               <button
                 onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
                 className="text-[#6b7a8d] hover:text-white font-mono text-sm transition"
@@ -222,10 +235,11 @@ export default function HomePage() {
               Join developers who use CodeSense AI to onboard faster, review better, and ship with confidence.
             </p>
 
-            <Link href="/sign-up">
-              <button className="bg-[#00e5a0] text-black font-mono font-medium px-10 py-3 rounded-lg hover:bg-[#00ffb3] hover:-translate-y-0.5 transition-all duration-200">
-                Start For Free →
-              </button>
+            <Link
+              href={ctaHref}
+              className="inline-block bg-[#00e5a0] text-black font-mono font-medium px-10 py-3 rounded-lg hover:bg-[#00ffb3] hover:-translate-y-0.5 transition-all duration-200"
+            >
+              Get Started →
             </Link>
 
             <p className="text-[10px] text-[#6b7a8d] mt-3 uppercase tracking-wider font-mono">

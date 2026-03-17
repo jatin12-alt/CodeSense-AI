@@ -69,11 +69,11 @@ Be practical and specific. Under 400 words.`
     const result = await geminiModel.generateContent(prompt)
     const text = result.response.text()
     return NextResponse.json({ result: text })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Demo API error:', error)
     return NextResponse.json(
       { error: 'AI analysis failed. Please try again.' },
       { status: 500 }
     )
-  }
+  } 
 }
