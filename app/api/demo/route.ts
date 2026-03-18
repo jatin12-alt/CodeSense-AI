@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { geminiModel } from '@/lib/gemini'
+import Groq from 'groq-sdk'
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY!,
+})
 
 const rateLimiter = new Map<string, { 
   count: number; reset: number 
@@ -63,11 +67,63 @@ Provide specific fixes for each issue. Under 400 words.`,
 Be practical and specific. Under 400 words.`
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   const prompt = prompts[feature] || prompts.chat
 
   try {
-    const result = await geminiModel.generateContent(prompt)
-    const text = result.response.text()
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 1000,
+    })
+    const text = completion.choices[0].message.content || ''
     return NextResponse.json({ result: text })
   } catch (error: unknown) {
     console.error('Demo API error:', error)

@@ -308,9 +308,9 @@ export default function RepoChatPage() {
                           <div className="mt-3">
                             <div className="font-mono text-[11px] text-[#6b7a8d] mb-2">Sources:</div>
                             <div className="flex flex-wrap gap-2">
-                              {m.sources.map((s) => (
+                              {Array.from(new Set(m.sources)).map((s, idx) => (
                                 <span
-                                  key={s}
+                                  key={`${s}-${idx}`}
                                   className="font-mono text-[11px] px-2 py-1 rounded-full border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] text-[#6b7a8d]"
                                 >
                                   {s}

@@ -5,14 +5,17 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@clerk/nextjs'
 
 export default function DemoPage() {
+  const { isSignedIn } = useAuth()
   const [selectedFeature, setSelectedFeature] = useState<'chat' | 'review' | 'bug' | 'onboarding'>('chat')
   const [repoUrl, setRepoUrl] = useState('')
   const [userInput, setUserInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const handleRunDemo = async () => {
     if (!repoUrl) {
@@ -179,16 +182,29 @@ export default function DemoPage() {
                     ✓ Complete
                   </span>
                 </div>
-                <div className="flex-1 overflow-y-auto max-h-96 pr-2 custom-scrollbar">
+                <div className="relative flex-1 overflow-y-auto max-h-96 pr-2 custom-scrollbar">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(result)
+                      setCopied(true)
+                      window.setTimeout(() => setCopied(false), 2000)
+                    }}
+                    className="absolute right-0 top-0 font-mono text-xs text-[#6b7a8d] hover:text-[#e8edf3] transition px-2 py-1 rounded-md border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)]"
+                  >
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
                   <p className="whitespace-pre-wrap font-mono text-sm text-[#e8edf3]/90 leading-relaxed">
                     {result}
                   </p>
                 </div>
-                <Link href="/sign-up" className="mt-6">
-                  <button className="w-full bg-[#00e5a0] text-black font-mono font-medium py-3 rounded-lg hover:bg-[#00ffb3] transition duration-200">
-                    🚀 Get Full Access — Sign Up Free
-                  </button>
-                </Link>
+                {!isSignedIn && (
+                  <Link href="/sign-up" className="mt-6">
+                    <button className="w-full bg-[#00e5a0] text-black font-mono font-medium py-3 rounded-lg hover:bg-[#00ffb3] transition duration-200">
+                      🚀 Get Full Access — Sign Up Free
+                    </button>
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 opacity-40">
@@ -203,16 +219,18 @@ export default function DemoPage() {
         </div>
 
         {/* Demo Banner */}
-        <div className="bg-[rgba(0,229,160,0.05)] border border-[rgba(0,229,160,0.1)] rounded-xl p-6 mt-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-sm text-[#e8edf3]/80 font-mono leading-relaxed">
-            ⚡ <span className="text-[#00e5a0] font-bold">Demo Mode</span> — Using AI simulation. Sign up to analyze your actual repositories with full RAG pipeline and real-time codebase indexing.
-          </p>
-          <Link href="/sign-up">
-            <Button variant="outline" size="sm" className="whitespace-nowrap border-[#00e5a0] text-[#00e5a0] hover:bg-[#00e5a0] hover:text-black">
-              Get Full Access →
-            </Button>
-          </Link>
-        </div>
+        {!isSignedIn && (
+          <div className="bg-[rgba(0,229,160,0.05)] border border-[rgba(0,229,160,0.1)] rounded-xl p-6 mt-12 flex flex-col md:flex-row items-center justify-between gap-6">
+            <p className="text-sm text-[#e8edf3]/80 font-mono leading-relaxed">
+              ⚡ <span className="text-[#00e5a0] font-bold">Demo Mode</span> — Using AI simulation. Sign up to analyze your actual repositories with full RAG pipeline and real-time codebase indexing.
+            </p>
+            <Link href="/sign-up">
+              <Button variant="outline" size="sm" className="whitespace-nowrap border-[#00e5a0] text-[#00e5a0] hover:bg-[#00e5a0] hover:text-black">
+                Get Full Access →
+              </Button>
+            </Link>
+          </div>
+        )}
       </main>
 
       <Footer />

@@ -1,16 +1,29 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
-
 export async function generateEmbedding(
   text: string
 ): Promise<number[]> {
-  const genAI = new GoogleGenerativeAI(
-    process.env.GEMINI_API_KEY!
+  const response = await fetch(
+    'https://api-atlas.nomic.ai/v1/embedding/text',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.NOMIC_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'nomic-embed-text-v1.5',
+        texts: [text],
+        task_type: 'search_document',
+      }),
+    }
   )
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-embedding-001'
-  })
-  const result = await model.embedContent(text)
-  return result.embedding.values
+
+  if (!response.ok) {
+    const err = (await response.json()) as unknown
+    throw new Error(`Nomic embedding error: ${JSON.stringify(err)}`)
+  }
+
+  const data = (await response.json()) as { embeddings: number[][] }
+  return data.embeddings[0]
 }
 
 export function chunkText( 

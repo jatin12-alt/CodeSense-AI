@@ -16,7 +16,9 @@ export function parseGitHubUrl(url: string): {
 } 
   
 export async function getRepoInfo(owner: string, repo: string) { 
+  console.log('getRepoInfo:', { owner, repo, hasToken: Boolean(process.env.GITHUB_TOKEN) })
   const { data } = await octokit.repos.get({ owner, repo }) 
+  console.log('getRepoInfo done:', { name: data.name, stars: data.stargazers_count })
   return { 
     name: data.name, 
     description: data.description, 
@@ -30,12 +32,14 @@ export async function getRepoFiles(
   owner: string, 
   repo: string 
 ): Promise<Array<{ path: string; content: string }>> { 
+  console.log('getRepoFiles:', { owner, repo, hasToken: Boolean(process.env.GITHUB_TOKEN) })
   const { data: tree } = await octokit.git.getTree({ 
     owner, 
     repo, 
     tree_sha: 'HEAD', 
     recursive: '1', 
   }) 
+  console.log('getRepoFiles tree size:', Array.isArray(tree.tree) ? tree.tree.length : 0)
   
   const codeExtensions = [ 
     '.ts', '.tsx', '.js', '.jsx', '.py', '.java', 
@@ -54,6 +58,7 @@ export async function getRepoFiles(
     !file.path.includes('dist') && 
     !file.path.includes('package-lock.json') 
   ) 
+  console.log('getRepoFiles candidate code files:', codeFiles.length)
   
   const filesWithContent = await Promise.all( 
     codeFiles.slice(0, 50).map(async (file) => { 
@@ -72,6 +77,7 @@ export async function getRepoFiles(
     }) 
   ) 
   
+  console.log('getRepoFiles done:', filesWithContent.filter(Boolean).length)
   return filesWithContent.filter(Boolean) as Array<{  
     path: string; content: string  
   }> 
