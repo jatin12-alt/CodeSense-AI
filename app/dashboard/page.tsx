@@ -5,19 +5,13 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useUser } from '@clerk/nextjs'
-import { Plus, Database, Trash2 } from 'lucide-react'
+import { Plus, Database } from 'lucide-react'
+import { LoadingCard } from '@/components/LoadingSpinner'
 
-type Repo = {
-  id: string
-  repoUrl: string
-  repoName: string
-  owner: string
-  description: string | null
-  language: string | null
-  isIndexed: number | null
-  totalFiles: number | null
-  createdAt: string | Date | null
-}
+// New components
+import { RepoCard, type Repo } from '@/components/dashboard/RepoCard'
+import { AddRepoModal } from '@/components/dashboard/AddRepoModal'
+import { ProgressBar } from '@/components/dashboard/ProgressBar'
 
 type IngestEvent = {
   progress: number
@@ -27,16 +21,9 @@ type IngestEvent = {
   error?: boolean
 }
 
-function formatDate(value: Repo['createdAt']) {
-  if (!value) return '—'
-  const d = value instanceof Date ? value : new Date(value)
-  if (Number.isNaN(d.getTime())) return '—'
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
-}
-
 export default function DashboardPage() {
   const router = useRouter()
-  const { isLoaded, isSignedIn } = useUser()
+  const { isLoaded, isSignedIn, user } = useUser()
 
   const [repos, setRepos] = useState<Repo[]>([])
   const [reposLoading, setReposLoading] = useState(false)
@@ -193,7 +180,11 @@ export default function DashboardPage() {
                 YOUR WORKSPACE
               </div>
               <h1 className="font-display font-bold text-3xl md:text-4xl mt-4">
-                Dashboard
+                {(() => {
+                  const hour = new Date().getHours()
+                  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+                  return `${greeting}, ${user?.firstName || 'Developer'}! 👋`
+                })()}
               </h1>
               <p className="text-[#6b7a8d] font-mono text-sm mt-2">
                 Track indexed repos and chat with their codebase.
@@ -228,48 +219,16 @@ export default function DashboardPage() {
 
           {/* Indexing status banner */}
           {ingest.running && (
-            <div className="mt-6 border border-[rgba(255,255,255,0.07)] bg-[#0f1520] rounded-2xl p-5">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="font-display font-semibold">Indexing in progress</div>
-                  <div className="font-mono text-xs text-[#6b7a8d] mt-1">{ingest.message}</div>
-                </div>
-                <div className="font-mono text-sm text-[#00e5a0] tabular-nums">{Math.max(0, Math.min(100, ingest.progress))}%</div>
-              </div>
-              <div className="mt-4 h-2 w-full rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-[#00e5a0] transition-[width] duration-300 ease-out"
-                  style={{ width: `${Math.max(0, Math.min(100, ingest.progress))}%` }}
-                />
-              </div>
-              <div className="mt-2 h-[1px] w-full bg-[rgba(255,255,255,0.05)]" />
-              <div className="mt-2 font-mono text-[11px] text-[#6b7a8d]">
-                Tip: larger repos can take a few minutes — keep this tab open.
-              </div>
-            </div>
+            <ProgressBar progress={ingest.progress} message={ingest.message} />
           )}
 
           {/* Repo grid */}
           <div className="mt-8">
             {reposLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-6 animate-pulse"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="h-5 w-1/2 bg-[rgba(255,255,255,0.05)] rounded-lg" />
-                      <div className="h-6 w-16 bg-[rgba(255,255,255,0.05)] rounded-full" />
-                    </div>
-                    <div className="h-3 w-1/3 bg-[rgba(255,255,255,0.03)] rounded-md mt-3" />
-                    <div className="mt-8 grid grid-cols-2 gap-4">
-                      <div className="h-10 bg-[rgba(255,255,255,0.03)] rounded-xl" />
-                      <div className="h-10 bg-[rgba(255,255,255,0.03)] rounded-xl" />
-                    </div>
-                    <div className="h-3 w-2/3 bg-[rgba(255,255,255,0.03)] rounded-md mt-6" />
-                  </div>
-                ))}
+                <LoadingCard />
+                <LoadingCard />
+                <LoadingCard />
               </div>
             ) : repos.length === 0 ? (
               <div className="relative overflow-hidden rounded-[2.5rem] border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-12 text-center group">
@@ -298,81 +257,14 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {repos.map((r) => {
-                  const indexed = (r.isIndexed ?? 0) === 1
-                  const indexing = !indexed && ingest.running && ingest.repoId === r.id
-                  return (
-                    <div
-                      key={r.id}
-                      className="group rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-5 hover:border-[rgba(0,229,160,0.25)] transition"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <button
-                          onClick={() => router.push(`/repo/${r.id}`)}
-                          className="text-left"
-                        >
-                          <div className="font-display font-semibold text-lg leading-tight text-[#e8edf3] group-hover:text-white transition">
-                            {r.repoName}
-                          </div>
-                          <div className="font-mono text-xs text-[#6b7a8d] mt-1">
-                            {r.owner}
-                          </div>
-                        </button>
-
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={[
-                              'font-mono text-[10px] tracking-[1.6px] uppercase px-2.5 py-1 rounded-full border',
-                              indexed
-                                ? 'border-[rgba(0,229,160,0.25)] bg-[rgba(0,229,160,0.08)] text-[#00e5a0]'
-                                : indexing
-                                  ? 'border-[rgba(0,170,255,0.25)] bg-[rgba(0,170,255,0.08)] text-[#00aaff]'
-                                  : 'border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.04)] text-[#6b7a8d]',
-                            ].join(' ')}
-                          >
-                            {indexed ? 'Indexed' : 'Indexing'}
-                          </span>
-
-                          <button
-                            onClick={() => void deleteRepo(r.id)}
-                            className="p-2 rounded-lg border border-[rgba(255,255,255,0.07)] text-[#6b7a8d] hover:text-[#ff4d4d] hover:border-[#ff4d4d]/30 hover:bg-[#ff4d4d]/5 transition"
-                            title="Delete repo"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 grid grid-cols-2 gap-3">
-                        <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] p-3">
-                          <div className="font-mono text-[10px] tracking-[2px] uppercase text-[#6b7a8d]">
-                            Language
-                          </div>
-                          <div className="mt-1 font-mono text-sm text-[#e8edf3]">
-                            {r.language || '—'}
-                          </div>
-                        </div>
-                        <div className="rounded-xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] p-3">
-                          <div className="font-mono text-[10px] tracking-[2px] uppercase text-[#6b7a8d]">
-                            Files
-                          </div>
-                          <div className="mt-1 font-mono text-sm text-[#e8edf3] tabular-nums">
-                            {r.totalFiles ?? 0}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-between gap-4">
-                        <div className="font-mono text-xs text-[#6b7a8d] truncate">
-                          {r.repoUrl}
-                        </div>
-                        <div className="font-mono text-xs text-[#6b7a8d] whitespace-nowrap">
-                          {formatDate(r.createdAt)}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
+                {repos.map((r) => (
+                  <RepoCard 
+                    key={r.id} 
+                    repo={r} 
+                    isIndexing={ingest.running && ingest.repoId === r.id} 
+                    onDelete={deleteRepo} 
+                  />
+                ))}
               </div>
             )}
           </div>
@@ -381,84 +273,16 @@ export default function DashboardPage() {
       <Footer />
 
       {/* Modal */}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center px-4"
-          role="dialog"
-          aria-modal="true"
-        >
-          <button
-            className="absolute inset-0 bg-[rgba(0,0,0,0.6)]"
-            onClick={closeModal}
-            aria-label="Close modal"
-          />
-
-          <div className="relative w-full max-w-xl rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="font-display font-bold text-xl">Add a GitHub repository</div>
-                <div className="font-mono text-xs text-[#6b7a8d] mt-1">
-                  We&apos;ll fetch code files, chunk them, and store embeddings for fast RAG.
-                </div>
-              </div>
-              <button
-                onClick={closeModal}
-                disabled={ingest.running}
-                className="font-mono text-xs px-3 py-1.5 rounded-lg border border-[rgba(255,255,255,0.07)] text-[#6b7a8d] hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="mt-5">
-              <label className="block font-mono text-[10px] tracking-[2px] uppercase text-[#6b7a8d]">
-                GitHub URL
-              </label>
-              <input
-                value={repoUrl}
-                onChange={(e) => setRepoUrl(e.target.value)}
-                placeholder="https://github.com/vercel/next.js"
-                disabled={ingest.running}
-                className="mt-2 w-full rounded-xl border border-[rgba(255,255,255,0.07)] bg-[#080b10] px-4 py-3 font-mono text-sm text-[#e8edf3] placeholder:text-[rgba(107,122,141,0.85)] outline-none focus:border-[rgba(0,229,160,0.35)]"
-              />
-            </div>
-
-            {ingest.running && (
-              <div className="mt-5 rounded-xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="font-mono text-xs text-[#6b7a8d]">{ingest.message}</div>
-                  <div className="font-mono text-sm text-[#00e5a0] tabular-nums">
-                    {Math.max(0, Math.min(100, ingest.progress))}%
-                  </div>
-                </div>
-                <div className="mt-3 h-2 w-full rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#00e5a0] transition-[width] duration-300 ease-out"
-                    style={{ width: `${Math.max(0, Math.min(100, ingest.progress))}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:justify-end">
-              <button
-                onClick={closeModal}
-                disabled={ingest.running}
-                className="font-mono text-sm px-4 py-3 rounded-xl border border-[rgba(255,255,255,0.07)] text-[#6b7a8d] hover:text-white hover:border-[rgba(255,255,255,0.18)] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => void startIngest()}
-                disabled={!repoUrl.trim() || ingest.running}
-                className="font-mono text-sm px-4 py-3 rounded-xl border border-[rgba(0,229,160,0.25)] bg-[rgba(0,229,160,0.08)] text-[#00e5a0] hover:bg-[rgba(0,229,160,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Start indexing
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddRepoModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        repoUrl={repoUrl} 
+        setRepoUrl={setRepoUrl} 
+        onStartIndexing={startIngest}
+        isIndexing={ingest.running}
+        indexingMessage={ingest.message}
+        indexingProgress={ingest.progress}
+      />
     </div>
   )
 }

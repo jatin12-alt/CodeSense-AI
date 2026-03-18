@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { LoadingPage, LoadingDots } from '@/components/LoadingSpinner'
 
 interface Message {
   id: string
@@ -257,13 +258,7 @@ export default function RepoChatPage() {
           <div className="mt-6 rounded-3xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] overflow-hidden">
             <div ref={scrollRef} className="h-[50vh] md:h-[62vh] overflow-y-auto px-4 md:px-5 py-6 space-y-4">
               {loadingHistory ? (
-                <div className="space-y-6 animate-pulse">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`h-12 w-${i % 2 === 0 ? '1/2' : '2/3'} rounded-2xl bg-[rgba(255,255,255,0.05)]`} />
-                    </div>
-                  ))}
-                </div>
+                <LoadingPage text="Loading chat history..." />
               ) : messages.length === 0 ? (
                 <div className="text-center py-10">
                   <div className="inline-flex items-center gap-2 border border-[rgba(0,170,255,0.25)] text-[#00aaff] text-[10px] tracking-[2px] uppercase px-3 py-1.5 rounded-full bg-[rgba(0,170,255,0.06)] font-mono w-fit mx-auto">
@@ -305,11 +300,7 @@ export default function RepoChatPage() {
                         ].join(' ')}
                       >
                         {isLoadingBubble ? (
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-[#00e5a0] animate-pulse" />
-                            <div className="h-2 w-2 rounded-full bg-[#00e5a0] animate-pulse [animation-delay:150ms]" />
-                            <div className="h-2 w-2 rounded-full bg-[#00e5a0] animate-pulse [animation-delay:300ms]" />
-                          </div>
+                          <LoadingDots />
                         ) : (
                           <div className="font-mono text-sm leading-7 whitespace-pre-wrap wrap-break-word">
                             {m.content}

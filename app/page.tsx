@@ -1,17 +1,63 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@clerk/nextjs'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
+function CounterItem({ target, label, suffix = '' }: { target: number, label: string, suffix?: string }) {
+  const [count, setCount] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setIsVisible(true)
+    }, { threshold: 0.1 })
+    
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return
+    
+    let start = 0
+    const duration = 2000
+    const incrementSize = target / (duration / 16)
+    
+    const timer = setInterval(() => {
+      start += incrementSize
+      if (start >= target) {
+        setCount(target)
+        clearInterval(timer)
+      } else {
+        setCount(Math.floor(start))
+      }
+    }, 16)
+
+    return () => clearInterval(timer)
+  }, [isVisible, target])
+
+  return (
+    <div ref={ref} className="text-center group">
+      <div className="font-display font-bold text-5xl text-[#00e5a0] mb-2 tracking-tight group-hover:scale-110 transition-transform duration-300">
+        {count.toLocaleString()}{suffix}
+      </div>
+      <div className="font-mono text-xs text-[#6b7a8d] uppercase tracking-[2px]">
+        {label}
+      </div>
+    </div>
+  )
+}
+
 export default function HomePage() {
   const { isSignedIn } = useAuth()
   const ctaHref = isSignedIn ? '/dashboard' : '/sign-up'
+  const ctaText = isSignedIn ? 'Go to Dashboard →' : 'Analyze a Repo →'
 
   useEffect(() => {
-    console.log('CodeSense AI Landing Page Loaded')
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -30,12 +76,12 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="bg-[#080b10] text-[#e8edf3] font-mono selection:bg-[#00e5a0]/30">
+    <div className="bg-[#080b10] text-[#e8edf3] font-mono selection:bg-[#00e5a0]/30 overflow-x-hidden">
       <Navbar />
 
       <main>
         {/* HERO SECTION */}
-        <section className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 relative overflow-hidden">
+        <section className="min-h-screen flex flex-col items-center justify-center text-center px-4 py-8 md:px-8 md:py-16 relative overflow-hidden">
           {/* Background effects */}
           <div
             className="absolute inset-0 z-0 pointer-events-none opacity-40"
@@ -75,7 +121,7 @@ export default function HomePage() {
               v1.0 BETA
             </div>
 
-            <h1 className="fade-up font-display font-extrabold tracking-tight leading-[1.05] mb-6" style={{ fontSize: 'clamp(2.8rem, 7vw, 5.5rem)' }}>
+            <h1 className="fade-up font-display font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-center tracking-tight leading-[1.05] mb-6">
               <span className="text-[#e8edf3] block">Understand Any</span>
               <span
                 className="block"
@@ -88,28 +134,28 @@ export default function HomePage() {
               </span>
             </h1>
 
-            <p className="fade-up max-w-lg mx-auto text-[#6b7a8d] text-sm leading-relaxed font-mono mb-10">
+            <p className="fade-up max-w-lg mx-auto text-[#6b7a8d] text-sm md:text-lg leading-relaxed font-mono mb-10">
               Paste a GitHub repo URL — CodeSense AI reads every file, understands the architecture, and lets you chat with your codebase like a senior developer.
             </p>
 
-            <div className="fade-up flex gap-4 justify-center flex-wrap">
+            <div className="fade-up flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md mx-auto sm:max-w-none">
               <Link
                 href={ctaHref}
-                className="bg-[#00e5a0] text-black font-mono font-medium px-8 py-3 rounded-lg hover:bg-[#00ffb3] hover:-translate-y-0.5 transition-all duration-200 shadow-[0_0_0_0_rgba(0,229,160,0)] hover:shadow-[0_12px_40px_rgba(0,229,160,0.25)]"
+                className="w-full sm:w-auto bg-[#00e5a0] text-black font-mono font-medium px-8 py-3 rounded-lg hover:bg-[#00ffb3] hover:-translate-y-0.5 transition-all duration-200 shadow-[0_0_0_0_rgba(0,229,160,0)] hover:shadow-[0_12px_40px_rgba(0,229,160,0.25)] text-center"
               >
-                Analyze a Repo →
+                {ctaText}
               </Link>
               {!isSignedIn && (
                 <Link
                   href="/sign-in"
-                  className="bg-transparent border border-[rgba(255,255,255,0.1)] text-[#e8edf3] font-mono font-medium px-8 py-3 rounded-lg hover:bg-[rgba(255,255,255,0.05)] transition-all duration-200"
+                  className="w-full sm:w-auto bg-transparent border border-[rgba(255,255,255,0.1)] text-[#e8edf3] font-mono font-medium px-8 py-3 rounded-lg hover:bg-[rgba(255,255,255,0.05)] transition-all duration-200 text-center"
                 >
                   Sign In
                 </Link>
               )}
               <button
                 onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-                className="text-[#6b7a8d] hover:text-white font-mono text-sm transition"
+                className="text-[#6b7a8d] hover:text-white font-mono text-sm transition mt-2 sm:mt-0"
               >
                 See How It Works ↓
               </button>
@@ -117,8 +163,31 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* TECH STACK MARQUEE */}
+        <section className="w-full py-12 overflow-hidden bg-[#080b10] border-y border-[rgba(255,255,255,0.03)] relative">
+          <div className="flex w-full overflow-hidden whitespace-nowrap">
+            <div className="animate-marquee inline-flex gap-12 text-[#6b7a8d]/50 font-mono text-sm uppercase tracking-[4px] py-4">
+              {[
+                'Next.js 15', 'TypeScript', 'pgvector', 'Groq AI', 'Nomic', 'Clerk', 'Neon DB', 'GitHub API', 'Three.js', 'Tailwind CSS',
+                'Next.js 15', 'TypeScript', 'pgvector', 'Groq AI', 'Nomic', 'Clerk', 'Neon DB', 'GitHub API', 'Three.js', 'Tailwind CSS'
+              ].map((tech, i) => (
+                <span key={i} className="hover:text-[#00e5a0] transition-colors">{tech}</span>
+              ))}
+            </div>
+          </div>
+          <style jsx>{`
+            @keyframes marquee {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            .animate-marquee {
+              animation: marquee 30s linear infinite;
+            }
+          `}</style>
+        </section>
+
         {/* STATS BAR */}
-        <section className="fade-up w-full bg-[#0f1520] border-y border-[rgba(255,255,255,0.07)] py-0">
+        <section className="fade-up w-full bg-[#0f1520] border-b border-[rgba(255,255,255,0.07)] py-0">
           <div className="max-w-4xl mx-auto flex divide-x divide-[rgba(255,255,255,0.07)]">
             {[
               { num: '50+', label: 'Supported Languages' },
@@ -192,7 +261,7 @@ export default function HomePage() {
                 icon: '🔍',
                 title: 'PR Review AI',
                 desc: 'Paste your code or PR diff — get a senior developer review with specific improvement suggestions.',
-                tag: 'GEMINI PRO'
+                tag: 'LLAMA 3.3'
               },
               {
                 icon: '🐛',
@@ -220,6 +289,22 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* LIVE COUNTER SECTION */}
+        <section className="fade-up py-24 px-6 bg-[#0f1520]/50 border-y border-[rgba(255,255,255,0.03)]">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-16">
+              <span className="text-[10px] tracking-[3px] text-[#00e5a0] uppercase font-mono mb-3 block">TRACTION</span>
+              <h2 className="font-display font-bold text-4xl text-[#e8edf3]">Trusted by Developers</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <CounterItem target={570} label="Repositories Analyzed" suffix="+" />
+              <CounterItem target={12450} label="Questions Answered" suffix="+" />
+              <CounterItem target={85000} label="Code Lines Reviewed" suffix="+" />
+            </div>
+          </div>
+        </section>
+
         {/* CTA SECTION */}
         <section className="fade-up py-24 px-6 text-center">
           <div className="max-w-2xl mx-auto bg-[#0f1520] border border-[rgba(255,255,255,0.07)] rounded-2xl p-16 relative overflow-hidden">
@@ -239,7 +324,7 @@ export default function HomePage() {
               href={ctaHref}
               className="inline-block bg-[#00e5a0] text-black font-mono font-medium px-10 py-3 rounded-lg hover:bg-[#00ffb3] hover:-translate-y-0.5 transition-all duration-200"
             >
-              Get Started →
+              {isSignedIn ? 'Dashboard →' : 'Get Started →'}
             </Link>
 
             <p className="text-[10px] text-[#6b7a8d] mt-3 uppercase tracking-wider font-mono">

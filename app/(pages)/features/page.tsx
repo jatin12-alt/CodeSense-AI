@@ -1,8 +1,11 @@
+'use client'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { useAuth } from '@clerk/nextjs'
 
 export default function FeaturesPage() {
+  const { isSignedIn } = useAuth()
   const features = [
     {
       icon: '💬',
@@ -105,9 +108,9 @@ export default function FeaturesPage() {
         </div>
 
         <div className="mt-24 text-center">
-          <Link href="/sign-up">
+          <Link href={isSignedIn ? "/dashboard" : "/sign-up"}>
             <button className="bg-[#00e5a0] text-black font-mono font-medium px-10 py-4 rounded-lg hover:bg-[#00ffb3] hover:-translate-y-0.5 transition-all duration-200">
-              Get Started Now →
+              {isSignedIn ? "Go to Dashboard →" : "Get Started Now →"}
             </button>
           </Link>
         </div>

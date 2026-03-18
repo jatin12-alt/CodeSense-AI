@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 import { healthReports } from '@/lib/schema'
-import { analyzeCodeHealth } from '@/lib/gemini'
+import { analyzeCodeHealth } from '@/lib/groq'
 import { neon } from '@neondatabase/serverless'
 import { desc, eq } from 'drizzle-orm'
 
@@ -11,6 +11,13 @@ type HealthChunkRow = {
   content: string
 }
 
+/**
+ * Executes a full code health analysis for a repository.
+ * Fetches code samples, uses AI to score them, and saves the report.
+ * 
+ * @param {NextRequest} req - The incoming Next.js request object
+ * @returns {Promise<NextResponse>} JSON response with the health report or error
+ */
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -84,7 +91,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Get latest health report for repo
+/**
+ * Retrieves the most recent health report for a specific repository.
+ * 
+ * @param {NextRequest} req - The incoming Next.js request object containing repoId in query params
+ * @returns {Promise<NextResponse>} JSON response with the latest report or null if none exists
+ */
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {

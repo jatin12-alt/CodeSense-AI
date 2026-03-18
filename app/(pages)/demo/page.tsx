@@ -148,12 +148,14 @@ export default function DemoPage() {
                 {isLoading ? 'Running Simulation...' : 'Run Demo →'}
               </button>
 
-              <p className="text-center text-xs text-[#6b7a8d] font-mono">
-                🔒 Want full features?{' '}
-                <Link href="/sign-up" className="text-[#00e5a0] hover:underline">
-                  Sign up free →
-                </Link>
-              </p>
+              {!isSignedIn && (
+                <p className="text-center text-xs text-[#6b7a8d] font-mono">
+                  🔒 Want full features?{' '}
+                  <Link href="/sign-up" className="text-[#00e5a0] hover:underline">
+                    Sign up free →
+                  </Link>
+                </p>
+              )}
             </div>
           </div>
 

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { LoadingPage, LoadingDots, LoadingCard } from '@/components/LoadingSpinner'
 
 type Repo = {
   id: string
@@ -14,8 +15,11 @@ type Repo = {
 
 type HealthSuggestion = {
   type: string
-  message: string
-  severity: string
+  message?: string
+  severity?: string
+  issue?: string
+  fix?: string
+  file?: string
 }
 
 type HealthReport = {
@@ -41,14 +45,15 @@ function scoreColor(score: number) {
 
 function badgeForType(type: string) {
   const t = (type || '').toLowerCase()
-  if (t === 'bug') return { label: 'BUG', bg: 'bg-[rgba(239,68,68,0.12)]', border: 'border-[rgba(239,68,68,0.35)]', text: 'text-[#ef4444]' }
+  if (t === 'bug')
+    return { label: 'BUG', bg: 'bg-[rgba(239,68,68,0.12)]', border: 'border-[rgba(239,68,68,0.35)]', text: 'text-[#ef4444]' }
   if (t === 'security')
     return { label: 'SECURITY', bg: 'bg-[rgba(245,158,11,0.12)]', border: 'border-[rgba(245,158,11,0.35)]', text: 'text-[#f59e0b]' }
-  if (t === 'performance')
+  if (t === 'performance' || t === 'perf')
     return { label: 'PERF', bg: 'bg-[rgba(0,170,255,0.12)]', border: 'border-[rgba(0,170,255,0.35)]', text: 'text-[#00aaff]' }
-  if (t === 'style')
-    return { label: 'STYLE', bg: 'bg-[rgba(168,85,247,0.14)]', border: 'border-[rgba(168,85,247,0.35)]', text: 'text-[#a855f7]' }
-  if (t === 'documentation')
+  if (t === 'style' || t === 'structure' || t === 'purple')
+    return { label: (t === 'structure' ? 'STRUCT' : 'STYLE'), bg: 'bg-[rgba(168,85,247,0.14)]', border: 'border-[rgba(168,85,247,0.35)]', text: 'text-[#a855f7]' }
+  if (t === 'documentation' || t === 'docs')
     return { label: 'DOCS', bg: 'bg-[rgba(0,229,160,0.10)]', border: 'border-[rgba(0,229,160,0.35)]', text: 'text-[#00e5a0]' }
   return { label: (type || 'INFO').toUpperCase(), bg: 'bg-[rgba(255,255,255,0.06)]', border: 'border-[rgba(255,255,255,0.10)]', text: 'text-[#e8edf3]' }
 }
@@ -179,6 +184,9 @@ export default function RepoHealthPage() {
 
         if (cancelled) return
         setRepo(repoData.repo)
+        if (maybeReport?.suggestions) {
+          console.log('Suggestions:', maybeReport.suggestions)
+        }
         setReport(maybeReport || null)
       } catch (e) {
         if (cancelled) return
@@ -225,6 +233,9 @@ export default function RepoHealthPage() {
 
       const data = (await res.json()) as { report?: HealthReport } | HealthReport
       const next = data && typeof data === 'object' && 'report' in data ? (data as { report?: HealthReport }).report : (data as HealthReport)
+      if (next?.suggestions) {
+        console.log('Suggestions:', next.suggestions)
+      }
       setReport(next || null)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Health analysis failed'
@@ -254,7 +265,11 @@ export default function RepoHealthPage() {
             </div>
           </div>
 
-          {error && (
+          {loading ? (
+            <LoadingPage text="Loading health report..." />
+          ) : (
+            <>
+              {error && (
             <div className="rounded-2xl border border-[rgba(255,0,80,0.35)] bg-[rgba(255,0,80,0.08)] p-4">
               <div className="font-mono text-xs text-[rgba(232,237,243,0.9)]">{error}</div>
             </div>
@@ -281,7 +296,7 @@ export default function RepoHealthPage() {
                       aria-hidden="true"
                     />
                   )}
-                  {running ? 'Analyzing…' : 'Run Health Analysis'}
+                  {running ? <LoadingDots /> : 'Run Health Analysis'}
                 </span>
               </button>
             </div>
@@ -314,12 +329,9 @@ export default function RepoHealthPage() {
 
               {loading && (
                 <>
-                  <div className="rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[rgba(8,11,16,0.9)] p-4 animate-pulse">
-                    <div className="h-20 w-full rounded-xl bg-[rgba(255,255,255,0.05)]" />
-                  </div>
-                  <div className="rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[rgba(8,11,16,0.9)] p-4 animate-pulse">
-                    <div className="h-20 w-full rounded-xl bg-[rgba(255,255,255,0.05)]" />
-                  </div>
+                  <LoadingCard />
+                  <LoadingCard />
+                  <LoadingCard />
                 </>
               )}
             </div>
@@ -365,7 +377,7 @@ export default function RepoHealthPage() {
                             <div className="flex items-center gap-2 flex-wrap">
                               <span
                                 className={[
-                                  'font-mono text-[10px] tracking-[2px] uppercase px-2 py-1 rounded-full border',
+                                  'font-mono text-[10px] tracking-[2px] uppercase px-2 py-1 rounded-full border text-[9px]',
                                   badge.bg,
                                   badge.border,
                                   badge.text,
@@ -373,19 +385,38 @@ export default function RepoHealthPage() {
                               >
                                 {badge.label}
                               </span>
-                              <span className="font-mono text-[10px] tracking-[2px] uppercase px-2 py-1 rounded-full border border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.05)] text-[#e8edf3]">
-                                {sev}
-                              </span>
+                              {s.severity && (
+                                <span className="font-mono text-[9px] tracking-[2px] uppercase px-2 py-1 rounded-full border border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.05)] text-[#e8edf3]">
+                                  {sev}
+                                </span>
+                              )}
+                              {s.file && (
+                                <span className="font-mono text-[9px] tracking-[1px] text-[#6b7a8d] px-2 py-1 rounded-md border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.03)]">
+                                  {s.file}
+                                </span>
+                              )}
                             </div>
-                            <p className="mt-2 font-mono text-[13px] leading-6 text-[#c5d0de] whitespace-pre-wrap">
-                              {s.message}
-                            </p>
+                            <div className="mt-3 space-y-2">
+                              <p className="font-mono text-[13px] leading-6 text-[#c5d0de] whitespace-pre-wrap">
+                                {s.issue || s.message || ''}
+                              </p>
+                              {s.fix && (
+                                <div className="mt-3 bg-[rgba(0,229,160,0.04)] border border-[rgba(0,229,160,0.1)] rounded-xl p-3">
+                                  <div className="text-[10px] uppercase tracking-widest text-[#00e5a0] font-mono mb-1">Suggested Fix</div>
+                                  <p className="font-mono text-[12px] text-[#e8edf3]/80 leading-relaxed italic">
+                                    {s.fix}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
-                          <div className="shrink-0">
-                            <div className="font-mono text-[11px] text-[#6b7a8d]">Severity</div>
-                            <div className="mt-1 font-display font-semibold text-sm text-[#e8edf3]">{sev}</div>
-                          </div>
+                          {s.severity && (
+                            <div className="shrink-0">
+                              <div className="font-mono text-[11px] text-[#6b7a8d]">Severity</div>
+                              <div className="mt-1 font-display font-semibold text-sm text-[#e8edf3]">{sev}</div>
+                            </div>
+                          )}
                         </div>
                       </li>
                     )
@@ -394,6 +425,8 @@ export default function RepoHealthPage() {
               )}
             </div>
           </section>
+          </>
+          )}
         </div>
       </main>
 

@@ -1,39 +1,198 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodeSense AI — AI-Powered Codebase Analyzer
 
-## Getting Started
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js" alt="Next.js 15" />
+  <img src="https://img.shields.io/badge/TypeScript-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Clerk-Auth-purple?style=for-the-badge&logo=clerk" alt="Clerk" />
+  <img src="https://img.shields.io/badge/Neon-Database-green?style=for-the-badge" alt="Neon DB" />
+  <img src="https://img.shields.io/badge/Groq-AI-orange?style=for-the-badge" alt="Groq AI" />
+  <img src="https://img.shields.io/badge/Vercel-Deployed-black?style=for-the-badge&logo=vercel" alt="Vercel" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License MIT" />
+</p>
 
-First, run the development server:
+<p align="center">
+  <strong>An AI-powered GitHub repository analyzer built with RAG.</strong><br/>
+  Index any GitHub repo and chat with it, review PRs,<br/>
+  analyze code health and generate onboarding guides.
+</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+<p align="center">
+  <a href="https://code-sense-ai-sandy.vercel.app/">
+    <img src="https://img.shields.io/badge/Live_Demo-Visit_App-blue?style=for-the-button&logo=vercel" alt="Live Demo" />
+  </a>
+  <a href="https://github.com/jatin12-alt/CodeSense-AI">
+    <img src="https://img.shields.io/badge/GitHub-Source_Code-black?style=for-the-button&logo=github" alt="GitHub" />
+  </a>
+</p>
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 🔍 RAG Indexing | Index any GitHub repo with high-performance embeddings |
+| 💬 Chat with Codebase | Context-aware AI chat that understands your entire project |
+| 👨‍💻 PR Code Review | Automated PR reviews powered by Llama 3.3 70B |
+| 🏥 Code Health | Comprehensive scores for complexity, bugs, and documentation |
+| 🚀 Onboarding Guide | Instantly generate documentation for new developers |
+| 🐛 Bug Detection | Identify vulnerabilities and logical bugs before they ship |
+| ⚡ SSE Streaming | Real-time Server-Sent Events for indexing progress |
+| 🎨 Premium Dark UI | Sleek, modern interface inspired by Vercel and Linear |
+| 🔮 3D Interactive Logo | Interactive Three.js octahedron in the navigation |
+| 🔐 Secure Auth | Enterprise-grade authentication via Clerk |
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|---|---|
+| **Framework** | Next.js 15 (App Router / Turbopack) |
+| **Language** | TypeScript |
+| **Auth** | Clerk |
+| **Database** | Neon DB (Serverless PostgreSQL) |
+| **Vector DB** | pgvector (HNSW Indexing) |
+| **AI Model** | Groq (Llama 3.3 70B Versatile) |
+| **Embeddings** | Nomic Embed v1.5 (768 dimensions) |
+| **GitHub API** | Octokit |
+| **Styling** | Tailwind CSS 4.0 |
+| **3D Graphics** | Three.js |
+| **Deployment** | Vercel |
+
+## 📁 Project Structure
+
+```text
+codesenseai/
+├── app/
+│   ├── (auth)/              # Clerk sign-in/sign-up
+│   ├── (pages)/             # Public landing and info pages
+│   ├── dashboard/           # User repository dashboard
+│   ├── repo/[repoId]/       # Repository-specific features
+│   │   ├── chat/            # RAG-powered chatbot
+│   │   ├── review/          # AI code review tool
+│   │   └── health/          # Codebase health analytics
+│   └── api/                 # Backend API routes
+│       ├── ingest/          # SSE repository indexing logic
+│       ├── chat/            # RAG retrieval and chat API
+│       ├── review/          # Code review generation
+│       ├── health/          # Health report generation
+│       └── demo/            # Public demo endpoints
+├── components/
+│   ├── Navbar.tsx           # Interactive navigation component
+│   ├── Footer.tsx           # Site footer
+│   └── LogoCanvas.tsx       # Three.js 3D logo implementation
+├── lib/
+│   ├── db.ts                # Neon DB / Drizzle client
+│   ├── schema.ts            # Database schema definitions
+│   ├── groq.ts              # Groq AI integration logic
+│   ├── github.ts            # Octokit GitHub integration
+│   └── embeddings.ts        # Nomic Atlas embedding utility
+└── public/                  # Static assets and icons
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
+- Node.js 18+ and npm
+- Accounts and API Keys for: **Clerk**, **Neon DB**, **Groq**, **Nomic**, and **GitHub**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Installation
 
-## Learn More
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/jatin12-alt/CodeSense-AI.git
+   cd CodeSense-AI
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Setup environment variables:**
+   Create a `.env.local` file in the root directory and add your keys (see table below).
+   ```bash
+   cp .env.example .env.local
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Sync database schema:**
+   ```bash
+   npm run db:push
+   ```
 
-## Deploy on Vercel
+5. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔑 Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | Description | Required |
+|---|---|---|
+| NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY | Clerk Public Key | ✅ |
+| CLERK_SECRET_KEY | Clerk Secret Key | ✅ |
+| NEXT_PUBLIC_CLERK_SIGN_IN_URL | `/sign-in` | ✅ |
+| NEXT_PUBLIC_CLERK_SIGN_UP_URL | `/sign-up` | ✅ |
+| NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL | `/dashboard` | ✅ |
+| NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL | `/dashboard` | ✅ |
+| DATABASE_URL | Neon PostgreSQL connection string | ✅ |
+| GROQ_API_KEY | Groq Cloud API Key | ✅ |
+| NOMIC_API_KEY | Nomic Atlas API Key | ✅ |
+| GITHUB_TOKEN | GitHub Personal Access Token | ✅ |
 
-# CodeSense AI
-AI-powered code analyzer that scores your code compatibility, highlights missing keywords, and suggests Gemini-powered rewrites to help you land more interviews.
+## 🔌 API Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/api/ingest` | `POST` | SSE-based repository indexing and embedding |
+| `/api/chat` | `POST` | RAG-based context-aware chat response |
+| `/api/chat` | `GET` | Retrieve chat history for a specific repository |
+| `/api/review` | `POST` | Generate AI-powered code review |
+| `/api/review` | `GET` | Fetch review history |
+| `/api/health` | `POST` | Execute health analysis and scoring |
+| `/api/health` | `GET` | Retrieve the latest health report |
+| `/api/demo` | `POST` | Public demo access logic |
+| `/api/repos` | `GET` | List all user-indexed repositories |
+| `/api/repos/[id]` | `GET/DELETE` | CRUD operations for specific repositories |
+
+## 🧠 How RAG Works
+
+1. **URL Submission**: User provides a public GitHub repository URL.
+2. **File Fetching**: Octokit extracts source code files (filtered by language).
+3. **Chunking**: Code files are split into manageable chunks (approx. 500 tokens).
+4. **Embedding**: Nomic's `v1.5` model generates 768-dimensional vectors for each chunk.
+5. **Storage**: Vectors and content are stored in **Neon DB** using the `pgvector` extension.
+6. **Querying**: When a user asks a question, the query is embedded into the same vector space.
+7. **Similarity Search**: Cosine similarity is used to find the top 8 most relevant code blocks.
+8. **LLM Context**: The retrieved code is passed to **Groq's Llama 3.3 70B** as grounded context.
+9. **Final Answer**: AI generates a response specifically based on the provided code context.
+
+## 🤝 Contributing
+
+We welcome contributions! To contribute:
+
+1. **Fork** the repository.
+2. **Create** a new branch: `git checkout -b feature/your-feature-name`.
+3. **Commit** your changes: `git commit -m 'Add some feature'`.
+4. **Push** to the branch: `git push origin feature/your-feature-name`.
+5. **Open** a Pull Request.
+
+Please ensure your code follows the existing style and includes proper TypeScript types.
+
+## 👨‍💻 Author
+
+**Jatin Dongre**
+- **LinkedIn**: [Jatin Dongre](https://www.linkedin.com/in/jatin-dongre-6a13a3294)
+- **GitHub**: [@jatin12-alt](https://github.com/jatin12-alt)
+- **Email**: [jatindongre926@gmail.com](mailto:jatindongre926@gmail.com)
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  Built with ❤️ by Jatin Dongre
+  <br/>
+  <a href="https://code-sense-ai-sandy.vercel.app/">code-sense-ai-sandy.vercel.app</a>
+</p>

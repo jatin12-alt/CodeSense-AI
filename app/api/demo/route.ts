@@ -9,6 +9,18 @@ const rateLimiter = new Map<string, {
   count: number; reset: number 
 }>()
 
+// Periodically clear expired rate limiter entries to prevent memory leak
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now()
+    for (const [key, value] of rateLimiter.entries()) {
+      if (now > value.reset) {
+        rateLimiter.delete(key)
+      }
+    }
+  }, 3600000) // Clear every hour
+}
+
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') || 
     req.headers.get('x-real-ip') || 'unknown'

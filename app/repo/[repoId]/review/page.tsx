@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { LoadingSpinner, LoadingDots } from '@/components/LoadingSpinner'
 
 type Repo = {
   id: string
@@ -327,7 +328,7 @@ export default function RepoReviewPage() {
                   disabled={!codeSnippet.trim() || isSubmitting || !canInteract}
                   className="mt-1 w-full font-mono text-sm px-4 py-2.5 rounded-xl border border-[rgba(0,229,160,0.25)] bg-[rgba(0,229,160,0.10)] text-[#00e5a0] hover:bg-[rgba(0,229,160,0.16)] hover:border-[rgba(0,229,160,0.4)] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? 'Reviewing…' : 'Review Code'}
+                  {isSubmitting ? <LoadingDots /> : 'Review Code'}
                 </button>
 
                 <p className="font-mono text-[11px] text-[#6b7a8d]">
@@ -414,11 +415,7 @@ export default function RepoReviewPage() {
 
             <div className="rounded-3xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-4">
               {loadingHistory ? (
-                <div className="space-y-3 animate-pulse">
-                  <div className="h-8 w-1/2 rounded-xl bg-[rgba(255,255,255,0.05)]" />
-                  <div className="h-8 w-2/3 rounded-xl bg-[rgba(255,255,255,0.05)]" />
-                  <div className="h-8 w-1/3 rounded-xl bg-[rgba(255,255,255,0.05)]" />
-                </div>
+                <LoadingSpinner text="Loading reviews..." />
               ) : history.length === 0 ? (
                 <div className="py-6 text-center font-mono text-[12px] text-[#6b7a8d]">
                   No past reviews yet. Your history will appear here.

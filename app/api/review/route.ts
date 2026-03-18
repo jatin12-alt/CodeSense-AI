@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 import { reviews } from '@/lib/schema'
-import { reviewCode } from '@/lib/gemini'
+import { reviewCode } from '@/lib/groq'
 import { generateEmbedding } from '@/lib/embeddings'
 import { neon } from '@neondatabase/serverless'
 import { eq } from 'drizzle-orm'
@@ -50,7 +50,13 @@ export async function POST(req: NextRequest) {
       .join('\n\n---\n\n')
 
     // Get AI review
-    const reviewContent = await reviewCode(codeSnippet, context)
+    let reviewContent: string
+    try {
+      reviewContent = await reviewCode(codeSnippet, context)
+    } catch (e) {
+      console.error('AI reviewCode failed:', e)
+      reviewContent = "AI review currently unavailable. Our models are busy, please try again later."
+    }
 
     // Save review
     await db.insert(reviews).values({

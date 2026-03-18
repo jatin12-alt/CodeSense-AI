@@ -1,9 +1,12 @@
+'use client'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Github, Linkedin, ExternalLink } from 'lucide-react'
+import { useAuth } from '@clerk/nextjs'
 
 export default function AboutPage() {
+  const { isSignedIn } = useAuth()
   const otherProjects = [
     {
       title: "Scatch",
@@ -165,9 +168,9 @@ export default function AboutPage() {
                 View GitHub →
               </button>
             </a>
-            <Link href="/sign-up">
+            <Link href={isSignedIn ? "/dashboard" : "/sign-up"}>
               <button className="text-[#6b7a8d] hover:text-white font-mono text-sm px-6 py-2 transition underline underline-offset-4">
-                Try CodeSense AI →
+                {isSignedIn ? "Go to Dashboard →" : "Try CodeSense AI →"}
               </button>
             </Link>
           </div>

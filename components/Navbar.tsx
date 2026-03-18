@@ -4,13 +4,21 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { Github, Menu, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import LogoCanvas from './LogoCanvas'
 
 export default function Navbar() {
   const { isSignedIn } = useAuth()
+  const pathname = usePathname()
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const navLinks = [
+    { href: '/demo', label: 'Demo' },
+    { href: '/about', label: 'About' },
+    { href: '/how-it-works', label: 'How It Works' },
+  ]
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -49,16 +57,24 @@ export default function Navbar() {
 
         {/* CENTER — Nav links */}
         <div className="hidden md:flex items-center gap-8">
-          <div className="flex gap-6">
-            <Link href="/demo" className="text-sm text-[#6b7a8d] hover:text-white transition font-mono">
-              Demo
-            </Link>
-            <Link href="/about" className="text-sm text-[#6b7a8d] hover:text-white transition font-mono">
-              About
-            </Link>
-            <Link href="/how-it-works" className="text-sm text-[#6b7a8d] hover:text-white transition font-mono">
-              How It Works
-            </Link>
+          <div className="flex gap-8">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative text-sm font-mono transition-colors group ${
+                    isActive ? 'text-white' : 'text-[#6b7a8d] hover:text-white'
+                  }`}
+                >
+                  {link.label}
+                  {isActive && (
+                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#00e5a0] rounded-full" />
+                  )}
+                </Link>
+              )
+            })}
           </div>
         </div>
 
@@ -76,7 +92,9 @@ export default function Navbar() {
           {isSignedIn && (
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center rounded-lg font-mono text-xs font-medium transition-colors text-[#6b7a8d] hover:text-white h-8 px-3"
+              className={`inline-flex items-center justify-center rounded-lg font-mono text-xs font-medium transition-colors h-8 px-3 ${
+                pathname === '/dashboard' ? 'text-white' : 'text-[#6b7a8d] hover:text-white'
+              }`}
             >
               Dashboard
             </Link>
@@ -115,15 +133,17 @@ export default function Navbar() {
       {/* MOBILE DROPDOWN */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 p-4 bg-[#0d1117] border-b border-[rgba(255,255,255,0.07)] flex flex-col gap-4 animate-in fade-in slide-in-from-top-2">
-          <Link href="/demo" className="text-sm text-[#6b7a8d] hover:text-white transition font-mono">
-            Demo
-          </Link>
-          <Link href="/about" className="text-sm text-[#6b7a8d] hover:text-white transition font-mono">
-            About
-          </Link>
-          <Link href="/how-it-works" className="text-sm text-[#6b7a8d] hover:text-white transition font-mono">
-            How It Works
-          </Link>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`text-sm font-mono transition-colors ${
+                pathname === link.href ? 'text-white' : 'text-[#6b7a8d] hover:text-white'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
           <div className="border-t border-[rgba(255,255,255,0.07)] pt-4 flex flex-col gap-3">
             {isSignedIn ? (
               <>

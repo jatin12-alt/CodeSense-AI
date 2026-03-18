@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useUser } from '@clerk/nextjs'
 import { Activity, BookOpen, GitPullRequest, MessageSquare } from 'lucide-react'
+import { LoadingPage, LoadingDots } from '@/components/LoadingSpinner'
 
 type Repo = {
   id: string
@@ -189,15 +190,7 @@ export default function RepoOverviewPage() {
 
           <div className="mt-6 rounded-3xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-7">
             {loading ? (
-              <div className="animate-pulse">
-                <div className="h-7 w-1/2 bg-[rgba(255,255,255,0.07)] rounded" />
-                <div className="mt-4 h-4 w-2/3 bg-[rgba(255,255,255,0.07)] rounded" />
-                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-16 rounded-2xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.06)]" />
-                  ))}
-                </div>
-              </div>
+              <LoadingPage text="Loading repository..." />
             ) : error ? (
               <div className="font-mono text-sm text-[#6b7a8d]">{error}</div>
             ) : repo ? (
@@ -299,7 +292,7 @@ export default function RepoOverviewPage() {
                   </div>
                   {c.title === 'Onboarding Guide' && (
                     <div className="mt-4 font-mono text-xs text-[#6b7a8d]">
-                      {onboardingLoading ? 'Generating…' : onboarding ? 'Generated — scroll down to view.' : 'Click to generate.'}
+                      {onboardingLoading ? <LoadingDots /> : onboarding ? 'Generated — scroll down to view.' : 'Click to generate.'}
                     </div>
                   )}
                 </button>
@@ -316,7 +309,7 @@ export default function RepoOverviewPage() {
                 disabled={!repo || onboardingLoading}
                 className="font-mono text-sm px-4 py-3 rounded-xl border border-[rgba(0,170,255,0.25)] bg-[rgba(0,170,255,0.08)] text-[#00aaff] hover:bg-[rgba(0,170,255,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {onboardingLoading ? 'Generating…' : 'Generate Onboarding Guide'}
+                {onboardingLoading ? <LoadingDots /> : 'Generate Onboarding Guide'}
               </button>
             </div>
 
