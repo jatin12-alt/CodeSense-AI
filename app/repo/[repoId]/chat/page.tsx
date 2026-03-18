@@ -78,12 +78,18 @@ export default function RepoChatPage() {
 
   const fetchRepo = useCallback(async () => {
     if (!canInteract) return
-    const res = await fetch(`/api/repos/${repoId}`)
-    if (!res.ok) {
-      const body = (await res.json().catch(() => null)) as { error?: string } | null
-      throw new Error(body?.error || `Failed to fetch repo (${res.status})`)
+    const repoRes = await fetch(`/api/repos/${repoId}`)
+    if (!repoRes.ok) {
+      if (repoRes.status === 404) throw new Error("Repo not found")
+      const body = (await repoRes.json().catch(() => null)) as { error?: string } | null
+      throw new Error(body?.error || "Something went wrong, please try again")
     }
-    const data = (await res.json()) as { repo: Repo }
+    const data = (await repoRes.json()) as { repo: Repo & { isIndexed?: number } }
+    
+    if (data.repo && data.repo.isIndexed === 0) {
+      throw new Error("Please index repo first")
+    }
+    
     setRepo(data.repo)
   }, [canInteract, repoId])
 
@@ -121,12 +127,16 @@ export default function RepoChatPage() {
   }, [canInteract, repoId])
 
   useEffect(() => {
+    document.title = "Chat | CodeSense AI"
     if (!isLoaded) return
     if (!isSignedIn) {
       router.replace('/sign-in')
       return
     }
+  }, [isLoaded, isSignedIn, router])
 
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return
     setError(null)
     void (async () => {
       try {
@@ -138,7 +148,7 @@ export default function RepoChatPage() {
         setLoadingHistory(false)
       }
     })()
-  }, [fetchHistory, fetchRepo, isLoaded, isSignedIn, router])
+  }, [fetchHistory, fetchRepo, isLoaded, isSignedIn])
 
   const suggestions = useMemo(
     () => [
@@ -220,7 +230,7 @@ export default function RepoChatPage() {
     <div className="min-h-screen bg-[#080b10] text-[#e8edf3]">
       <Navbar />
 
-      <main className="pt-28 pb-24 px-6">
+      <main className="pt-28 pb-32 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between gap-4">
             <button
@@ -245,12 +255,14 @@ export default function RepoChatPage() {
           )}
 
           <div className="mt-6 rounded-3xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] overflow-hidden">
-            <div ref={scrollRef} className="h-[62vh] overflow-y-auto px-5 py-6 space-y-4">
+            <div ref={scrollRef} className="h-[50vh] md:h-[62vh] overflow-y-auto px-4 md:px-5 py-6 space-y-4">
               {loadingHistory ? (
-                <div className="space-y-3 animate-pulse">
-                  <div className="h-10 w-2/3 rounded-2xl bg-[rgba(255,255,255,0.06)]" />
-                  <div className="h-10 w-1/2 rounded-2xl bg-[rgba(255,255,255,0.06)] ml-auto" />
-                  <div className="h-10 w-2/3 rounded-2xl bg-[rgba(255,255,255,0.06)]" />
+                <div className="space-y-6 animate-pulse">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`h-12 w-${i % 2 === 0 ? '1/2' : '2/3'} rounded-2xl bg-[rgba(255,255,255,0.05)]`} />
+                    </div>
+                  ))}
                 </div>
               ) : messages.length === 0 ? (
                 <div className="text-center py-10">
@@ -331,7 +343,7 @@ export default function RepoChatPage() {
 
       {/* Input bar */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-[rgba(255,255,255,0.07)] bg-[rgba(8,11,16,0.92)] backdrop-blur-xl">
-        <div className="max-w-5xl mx-auto px-6 py-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
           <div className="rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] px-4 py-3 flex items-end gap-3">
             <textarea
               ref={textareaRef}

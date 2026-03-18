@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const sql = neon(process.env.DATABASE_URL!)
 
     // Fetch all file chunks for this repo
-    const allChunks = await sql<HealthChunkRow>`
+    const rows = await sql`
       SELECT DISTINCT ON (file_path) 
         file_path, content
       FROM embeddings
@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
       ORDER BY file_path, chunk_index
       LIMIT 30
     `
+    const allChunks = rows as unknown as HealthChunkRow[]
 
     if (allChunks.length === 0) {
       return NextResponse.json({ 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { Github, Menu, X } from 'lucide-react'
+import LogoCanvas from './LogoCanvas'
 
 export default function Navbar() {
   const { isSignedIn } = useAuth()
@@ -35,7 +36,10 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* LEFT — Logo */}
-        <Link href="/">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="hidden md:block">
+            <LogoCanvas />
+          </div>
           <span className="font-display font-bold text-xl cursor-pointer">
             <span className="text-[#e8edf3]">Code</span>
             <span className="text-[#00e5a0]">Sense</span>

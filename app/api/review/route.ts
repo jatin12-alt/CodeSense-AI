@@ -36,13 +36,14 @@ export async function POST(req: NextRequest) {
     const codeEmbedding = await generateEmbedding(codeSnippet)
     const vectorStr = `[${codeEmbedding.join(',')}]`
 
-    const contextChunks = await sql<ReviewContextRow>`
+    const rows = await sql`
       SELECT content, file_path
       FROM embeddings
       WHERE repo_id = ${repoId}::uuid
       ORDER BY embedding <=> ${vectorStr}::vector
       LIMIT 5
     `
+    const contextChunks = rows as unknown as ReviewContextRow[]
 
     const context = contextChunks
       .map((c) => `File: ${c.file_path}\n${c.content}`)

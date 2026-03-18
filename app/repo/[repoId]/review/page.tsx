@@ -1,6 +1,6 @@
  'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import Navbar from '@/components/Navbar'
@@ -55,7 +55,7 @@ function parseMarkdownLike(text: string): ParsedLine[] {
 }
 
 function renderInline(text: string) {
-  const segments: JSX.Element[] = []
+  const segments: React.JSX.Element[] = []
   let remaining = text
 
   while (remaining.length > 0) {
@@ -140,6 +140,7 @@ export default function RepoReviewPage() {
   const charCount = codeSnippet.length
 
   useEffect(() => {
+    document.title = "Review | CodeSense AI"
     if (!isLoaded) return
     if (!isSignedIn) {
       router.replace('/sign-in')
@@ -160,16 +161,21 @@ export default function RepoReviewPage() {
         ])
 
         if (!repoRes.ok) {
+          if (repoRes.status === 404) throw new Error("Repo not found")
           const body = (await repoRes.json().catch(() => null)) as { error?: string } | null
-          throw new Error(body?.error || `Failed to fetch repo (${repoRes.status})`)
+          throw new Error(body?.error || "Something went wrong, please try again")
+        }
+
+        const repoData = (await repoRes.json()) as { repo: Repo & { isIndexed?: number } }
+
+        if (repoData.repo && repoData.repo.isIndexed === 0) {
+          throw new Error("Please index repo first")
         }
 
         if (!historyRes.ok) {
           const body = (await historyRes.json().catch(() => null)) as { error?: string } | null
-          throw new Error(body?.error || `Failed to fetch review history (${historyRes.status})`)
+          throw new Error(body?.error || "Something went wrong, please try again")
         }
-
-        const repoData = (await repoRes.json()) as { repo: Repo }
         const historyData = (await historyRes.json()) as { reviews: ReviewHistoryItem[] }
 
         if (cancelled) return
@@ -281,7 +287,7 @@ export default function RepoReviewPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <section className="rounded-3xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-5 flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>

@@ -131,6 +131,7 @@ export default function RepoHealthPage() {
   const repoName = repo?.repoName || 'this repository'
 
   useEffect(() => {
+    document.title = "Health | CodeSense AI"
     if (!isLoaded) return
     if (!isSignedIn) {
       router.replace('/sign-in')
@@ -151,16 +152,21 @@ export default function RepoHealthPage() {
         ])
 
         if (!repoRes.ok) {
+          if (repoRes.status === 404) throw new Error("Repo not found")
           const body = (await repoRes.json().catch(() => null)) as { error?: string } | null
-          throw new Error(body?.error || `Failed to fetch repo (${repoRes.status})`)
+          throw new Error(body?.error || "Something went wrong, please try again")
+        }
+
+        const repoData = (await repoRes.json()) as { repo: Repo & { isIndexed?: number } }
+        
+        if (repoData.repo && repoData.repo.isIndexed === 0) {
+          throw new Error("Please index repo first")
         }
 
         if (!healthRes.ok) {
           const body = (await healthRes.json().catch(() => null)) as { error?: string } | null
-          throw new Error(body?.error || `Failed to fetch health report (${healthRes.status})`)
+          throw new Error(body?.error || "Something went wrong, please try again")
         }
-
-        const repoData = (await repoRes.json()) as { repo: Repo }
         const healthData = (await healthRes.json()) as
           | { report: HealthReport | null }
           | HealthReport

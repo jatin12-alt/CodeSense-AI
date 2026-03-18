@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const vectorStr = `[${questionEmbedding.join(',')}]`
 
     // Step 2 — Similarity search in pgvector
-    const similarChunks = await sql<SimilarChunkRow>`
+    const rows = await sql`
       SELECT content, file_path,
         1 - (embedding <=> ${vectorStr}::vector) as similarity
       FROM embeddings
@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
       ORDER BY embedding <=> ${vectorStr}::vector
       LIMIT 8
     `
+    const similarChunks = rows as unknown as SimilarChunkRow[]
 
     if (similarChunks.length === 0) {
       return NextResponse.json({ 
