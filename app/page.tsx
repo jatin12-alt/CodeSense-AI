@@ -51,13 +51,43 @@ function CounterItem({ target, label, suffix = '' }: { target: number, label: st
     </div>
   )
 }
-
 export default function HomePage() {
   const { isSignedIn } = useAuth()
   const ctaHref = isSignedIn ? '/dashboard' : '/sign-up'
   const ctaText = isSignedIn ? 'Go to Dashboard →' : 'Analyze a Repo →'
 
+  const [stats, setStats] = useState({
+    totalVisitors: 0,
+    totalDemoRuns: 0,
+    totalRepos: 0
+  })
+
   useEffect(() => {
+    // Track page visit
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: 'page_visit' })
+    }).catch(() => {})
+
+    // Fetch stats
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/analytics')
+        const data = await res.json()
+        if (data && !data.error) {
+          setStats({
+            totalVisitors: data.totalVisitors || 0,
+            totalDemoRuns: data.totalDemoRuns || 0,
+            totalRepos: data.totalRepos || 0
+          })
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats', err)
+      }
+    }
+    fetchStats()
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -298,9 +328,9 @@ export default function HomePage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <CounterItem target={570} label="Repositories Analyzed" suffix="+" />
-              <CounterItem target={12450} label="Questions Answered" suffix="+" />
-              <CounterItem target={85000} label="Code Lines Reviewed" suffix="+" />
+              <CounterItem target={stats.totalVisitors} label="Unique Visitors" suffix="+" />
+              <CounterItem target={stats.totalDemoRuns} label="Demo Runs" suffix="+" />
+              <CounterItem target={stats.totalRepos} label="Repositories Indexed" suffix="+" />
             </div>
           </div>
         </section>
