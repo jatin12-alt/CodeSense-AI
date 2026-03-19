@@ -9,7 +9,7 @@ import { useAuth } from '@clerk/nextjs'
 
 export default function DemoPage() {
   const { isSignedIn } = useAuth()
-  const [selectedFeature, setSelectedFeature] = useState<'chat' | 'review' | 'bug' | 'onboarding'>('chat')
+  const [selectedFeature, setSelectedFeature] = useState<'chat' | 'review' | 'bug' | 'onboarding' | 'readme'>('chat')
   const [repoUrl, setRepoUrl] = useState('')
   const [userInput, setUserInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -22,7 +22,7 @@ export default function DemoPage() {
       setError('Please enter a repository URL')
       return
     }
-    if (selectedFeature !== 'onboarding' && !userInput) {
+    if (selectedFeature !== 'onboarding' && selectedFeature !== 'readme' && !userInput) {
       setError('Please provide some input for the AI')
       return
     }
@@ -91,11 +91,12 @@ export default function DemoPage() {
                     { id: 'chat', label: '💬 Chat' },
                     { id: 'review', label: '🔍 PR Review' },
                     { id: 'bug', label: '🐛 Bug Detection' },
-                    { id: 'onboarding', label: '📋 Onboarding' }
+                    { id: 'onboarding', label: '📋 Onboarding' },
+                    { id: 'readme', label: '📄 README' }
                   ].map((feature) => (
                     <button
                       key={feature.id}
-                      onClick={() => setSelectedFeature(feature.id as 'chat' | 'review' | 'bug' | 'onboarding')}
+                      onClick={() => setSelectedFeature(feature.id as 'chat' | 'review' | 'bug' | 'onboarding' | 'readme')}
                       className={`px-4 py-2 rounded-full font-mono text-xs transition-all ${
                         selectedFeature === feature.id
                           ? 'bg-[#00e5a0] text-black font-bold'
@@ -110,7 +111,7 @@ export default function DemoPage() {
 
               {/* Section 3 — Dynamic textarea */}
               <div className="space-y-3">
-                {selectedFeature !== 'onboarding' ? (
+                {selectedFeature !== 'onboarding' && selectedFeature !== 'readme' ? (
                   <>
                     <label className="text-[10px] uppercase tracking-widest text-[#6b7a8d] font-mono">
                       {selectedFeature === 'chat' ? 'Your Question' : 'Code Snippet'}
@@ -132,7 +133,9 @@ export default function DemoPage() {
                 ) : (
                   <div className="p-4 bg-[rgba(0,229,160,0.05)] border border-[rgba(0,229,160,0.1)] rounded-lg">
                     <p className="text-xs text-[#6b7a8d] font-mono leading-relaxed">
-                      AI will generate a complete onboarding guide based on the repository URL provided.
+                      {selectedFeature === 'onboarding' 
+                        ? 'AI will generate a complete onboarding guide based on the repository URL provided.'
+                        : 'AI will generate an impressive professional README based on the repository context.'}
                     </p>
                   </div>
                 )}

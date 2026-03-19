@@ -76,7 +76,53 @@ Provide specific fixes for each issue. Under 400 words.`,
 ## Key Files to Read First
 ## Setup Instructions
 ## First Tasks
-Be practical and specific. Under 400 words.`
+Be practical and specific. Under 400 words.`,
+
+    readme: `Generate a PROFESSIONAL README.md for this GitHub project: ${repoUrl}
+${userInput}
+
+FOLLOW THIS EXACT STRUCTURE:
+
+# [Project Name] — [One line description]
+
+<p align="center">
+  [shields.io badges for tech stack]
+</p>
+
+<p align="center">
+  <strong>[2 line description]</strong>
+</p>
+
+<p align="center">
+  [Live Demo badge] [GitHub badge]
+</p>
+
+---
+
+## ✨ Features
+[Table with Feature | Description]
+
+## 🛠️ Tech Stack  
+[Table with Category | Technology]
+
+## 🚀 Getting Started
+[Prerequisites, Installation steps]
+
+## 🔑 Environment Variables
+[Table with Variable | Description | Required]
+
+## 🌐 Deployment
+[Vercel deployment steps]
+
+## 🤝 Contributing
+[Standard contributing guide]
+
+## 👨💻 Author
+[Author section with LinkedIn + GitHub]
+
+Make it IMPRESSIVE and COMPLETE.
+Use emojis, tables, badges.
+Return ONLY markdown.`
   }
 
 
