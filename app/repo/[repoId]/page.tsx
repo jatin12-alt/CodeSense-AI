@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useUser } from '@clerk/nextjs'
-import { Activity, BookOpen, GitPullRequest, MessageSquare } from 'lucide-react'
+import { Activity, BookOpen, FileText, GitPullRequest, MessageSquare, Copy, Download } from 'lucide-react'
 import { LoadingPage, LoadingDots } from '@/components/LoadingSpinner'
 
 type Repo = {
@@ -73,6 +73,9 @@ export default function RepoOverviewPage() {
   const [onboardingLoading, setOnboardingLoading] = useState(false)
   const [onboarding, setOnboarding] = useState<string | null>(null)
 
+  const [readme, setReadme] = useState('')
+  const [generatingReadme, setGeneratingReadme] = useState(false)
+
   const canInteract = isLoaded && isSignedIn
 
   const fetchRepo = useCallback(async () => {
@@ -136,6 +139,40 @@ export default function RepoOverviewPage() {
     }
   }, [onboardingLoading, repo?.repoUrl])
 
+  const generateReadme = async () => {
+    if (!repoId || generatingReadme) return
+    setGeneratingReadme(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/readme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repoId })
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null
+        throw new Error(body?.error || `Failed to generate README (${res.status})`)
+      }
+      const data = (await res.json()) as { readme: string }
+      setReadme(data.readme)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to generate README'
+      setError(msg)
+    } finally {
+      setGeneratingReadme(false)
+    }
+  }
+
+  const downloadReadme = () => {
+    const blob = new Blob([readme], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'README.md'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const cards: {
     title: string
     description: string
@@ -172,6 +209,14 @@ export default function RepoOverviewPage() {
       Icon: BookOpen,
       color: '#f97316',
       onClick: () => void generateOnboarding(),
+    },
+    {
+      title: 'README Generator',
+      description: 'Generate a professional README based on your actual code files.',
+      href: '',
+      Icon: FileText,
+      color: '#00e5a0',
+      onClick: () => void generateReadme(),
     },
   ] as const
 
@@ -295,6 +340,11 @@ export default function RepoOverviewPage() {
                       {onboardingLoading ? <LoadingDots /> : onboarding ? 'Generated — scroll down to view.' : 'Click to generate.'}
                     </div>
                   )}
+                  {c.title === 'README Generator' && (
+                    <div className="mt-4 font-mono text-xs text-[#6b7a8d]">
+                      {generatingReadme ? <LoadingDots /> : readme ? 'Generated — scroll down to view.' : 'Click to generate.'}
+                    </div>
+                  )}
                 </button>
               )
             })}
@@ -322,6 +372,61 @@ export default function RepoOverviewPage() {
                 <div
                   className="prose prose-invert max-w-none font-mono text-[#e8edf3]"
                   dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(onboarding) }}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* README section */}
+          <div className="mt-8">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="font-display font-bold text-2xl">Generated README</h2>
+              <div className="flex gap-2">
+                {readme && (
+                  <>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(readme)
+                      }}
+                      className="font-mono text-xs px-3 py-2 rounded-lg border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] text-[#6b7a8d] hover:text-white transition flex items-center gap-2"
+                    >
+                      <Copy size={13} /> Copy
+                    </button>
+                    <button
+                      onClick={downloadReadme}
+                      className="font-mono text-xs px-3 py-2 rounded-lg border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] text-[#6b7a8d] hover:text-white transition flex items-center gap-2"
+                    >
+                      <Download size={13} /> Download
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4">
+               <button
+                  onClick={() => void generateReadme()}
+                  disabled={!repo || generatingReadme}
+                  className="w-full font-mono text-sm px-6 py-4 rounded-2xl border border-[rgba(0,229,160,0.25)] bg-[rgba(0,229,160,0.08)] text-[#00e5a0] hover:bg-[rgba(0,229,160,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {generatingReadme ? <LoadingDots /> : (
+                    <>
+                      <FileText size={18} />
+                      {readme ? 'Regenerate README' : 'Generate README'}
+                    </>
+                  )}
+                </button>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-8 min-h-[200px] font-mono">
+              {!readme ? (
+                <div className="font-mono text-sm text-[#6b7a8d] leading-7">
+                  Generate a professional README.md file based on your codebase structure and content.
+                </div>
+              ) : (
+                <div
+                  className="prose prose-invert max-w-none font-mono text-[#e8edf3]"
+                  dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(readme) }}
                 />
               )}
             </div>

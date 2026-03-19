@@ -151,43 +151,40 @@ export default function RepoHealthPage() {
       setError(null)
       setLoading(true)
       try {
-        const [repoRes, healthRes] = await Promise.all([
-          fetch(`/api/repos/${repoId}`),
-          fetch(`/api/health?repoId=${encodeURIComponent(repoId)}`),
-        ])
-
+        const repoRes = await fetch(`/api/repos/${repoId}`)
         if (!repoRes.ok) {
           if (repoRes.status === 404) throw new Error("Repo not found")
           const body = (await repoRes.json().catch(() => null)) as { error?: string } | null
           throw new Error(body?.error || "Something went wrong, please try again")
         }
-
         const repoData = (await repoRes.json()) as { repo: Repo & { isIndexed?: number } }
-        
+        if (cancelled) return
+        setRepo(repoData.repo)
+
         if (repoData.repo && repoData.repo.isIndexed === 0) {
           throw new Error("Please index repo first")
         }
 
+        const healthRes = await fetch(`/api/health?repoId=${encodeURIComponent(repoId)}`)
         if (!healthRes.ok) {
           const body = (await healthRes.json().catch(() => null)) as { error?: string } | null
           throw new Error(body?.error || "Something went wrong, please try again")
         }
-        const healthData = (await healthRes.json()) as
-          | { report: HealthReport | null }
-          | HealthReport
-          | null
-
-        const maybeReport =
-          healthData && typeof healthData === 'object' && 'report' in healthData
-            ? (healthData as { report: HealthReport | null }).report
-            : (healthData as HealthReport | null)
-
+        const healthData = (await healthRes.json()) as { report: any | null }
+        
         if (cancelled) return
-        setRepo(repoData.repo)
-        if (maybeReport?.suggestions) {
-          console.log('Suggestions:', maybeReport.suggestions)
+
+        if (healthData.report) {
+          const report = healthData.report
+          if (typeof report.suggestions === 'string') {
+            try {
+              report.suggestions = JSON.parse(report.suggestions)
+            } catch (e) {
+              console.error('Failed to parse suggestions:', e)
+            }
+          }
+          setReport(report)
         }
-        setReport(maybeReport || null)
       } catch (e) {
         if (cancelled) return
         const msg = e instanceof Error ? e.message : 'Failed to load health page'
@@ -296,7 +293,7 @@ export default function RepoHealthPage() {
                       aria-hidden="true"
                     />
                   )}
-                  {running ? <LoadingDots /> : 'Run Health Analysis'}
+                  {running ? <LoadingDots /> : report ? 'Refresh Analysis' : 'Run Health Analysis'}
                 </span>
               </button>
             </div>
