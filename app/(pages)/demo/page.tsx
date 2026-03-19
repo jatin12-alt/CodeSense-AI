@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -17,6 +17,22 @@ export default function DemoPage() {
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  // Track page visit on mount
+  useEffect(() => {
+    const trackVisit = async () => {
+      try {
+        await fetch('/api/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_type: 'page_visit' })
+        })
+      } catch (err) {
+        console.warn('Analytics tracking failed', err)
+      }
+    }
+    trackVisit()
+  }, [])
+
   const handleRunDemo = async () => {
     if (!repoUrl) {
       setError('Please enter a repository URL')
@@ -30,6 +46,20 @@ export default function DemoPage() {
     setIsLoading(true)
     setError(null)
     setResult(null)
+
+    // Track demo run
+    try {
+      void fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          event_type: 'demo_run', 
+          feature: selectedFeature 
+        })
+      })
+    } catch (err) {
+      console.warn('Analytics tracking failed', err)
+    }
 
     try {
       const response = await fetch('/api/demo', {

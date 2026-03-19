@@ -71,6 +71,24 @@ export default function DashboardPage() {
     void fetchRepos()
   }, [fetchRepos, isLoaded, isSignedIn, router])
 
+  // Track sign up on first dashboard visit
+  useEffect(() => {
+    if (canInteract && user?.id) {
+      const signupTracked = localStorage.getItem(`codesense_signup_tracked_${user.id}`)
+      if (!signupTracked) {
+        void fetch('/api/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_type: 'sign_up' })
+        }).then(() => {
+          localStorage.setItem(`codesense_signup_tracked_${user.id}`, 'true')
+        }).catch(err => {
+          console.warn('Signup tracking failed', err)
+        })
+      }
+    }
+  }, [canInteract, user?.id])
+
   const indexedCount = useMemo(() => repos.filter(r => (r.isIndexed ?? 0) === 1).length, [repos])
 
   const closeModal = useCallback(() => {
@@ -140,6 +158,16 @@ export default function DashboardPage() {
             setIngest(prev => ({ ...prev, running: false }))
             closeModal()
             void fetchRepos()
+            
+            // Track repo indexed
+            void fetch('/api/analytics', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                event_type: 'repo_indexed',
+                repoId: evt.repoId || ingest.repoId
+              })
+            })
             return
           }
         }
