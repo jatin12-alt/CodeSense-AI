@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Github } from 'lucide-react'
 
 export default function Footer() {
-  const techStack = ["Next.js 15", "Gemini AI", "pgvector", "Clerk", "Neon DB"]
+  const techStack = ["Next.js 15", "Groq AI", "pgvector", "Clerk", "Neon DB"]
 
   return (
     <footer className="bg-[#080b10] pt-16 pb-8 px-10 relative">
@@ -102,7 +102,7 @@ export default function Footer() {
       {/* ROW 2 — Bottom bar */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="text-[11px] text-[#6b7a8d] font-mono">
-          © 2025 CodeSense AI. All rights reserved.
+          © 2026 CodeSense AI. All rights reserved.
         </p>
 
         <div className="flex gap-2 flex-wrap justify-center">
