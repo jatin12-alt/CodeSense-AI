@@ -65,29 +65,70 @@ export async function POST(req: NextRequest) {
       },
       {
         role: 'user',
-        content: `Generate a professional README.md for:
-          
-          Repo: ${repoData.repoName}
-          Owner: ${repoData.owner}
-          Description: ${repoData.description}
-          Language: ${repoData.language}
-          GitHub: ${repoData.repoUrl}
-          
-          Code files sample:
-          ${filesSummary}
-          
-          Include these sections:
-          # Project Name
-          ## About
-          ## Features
-          ## Tech Stack
-          ## Getting Started
-          ## Installation
-          ## Usage
-          ## Contributing
-          ## License
-          
-          Make it professional and detailed.`
+        content: `Generate a PROFESSIONAL README.md for this GitHub project.
+
+Project Details:
+- Name: ${repoData.repoName}
+- Owner: ${repoData.owner}  
+- Description: ${repoData.description}
+- Language: ${repoData.language}
+- GitHub: ${repoData.repoUrl}
+
+Code Sample:
+${filesSummary}
+
+FOLLOW THIS EXACT STRUCTURE:
+
+# ${repoData.repoName} — [One line description]
+
+<p align="center">
+  [shields.io badges for tech stack]
+</p>
+
+<p align="center">
+  <strong>[2 line description]</strong>
+</p>
+
+<p align="center">
+  [Live Demo badge] [GitHub badge]
+</p>
+
+---
+
+## ✨ Features
+[Table with Feature | Description]
+
+## 🛠️ Tech Stack  
+[Table with Category | Technology]
+
+## 📁 Project Structure
+[Code block with folder tree]
+
+## 🚀 Getting Started
+[Prerequisites, Installation steps]
+
+## 🔑 Environment Variables
+[Table with Variable | Description | Required]
+
+## 🌐 Deployment
+[Vercel deployment steps]
+
+## 🤝 Contributing
+[Standard contributing guide]
+
+## 📄 License
+MIT License
+
+## 👨💻 Author
+[Author section with LinkedIn + GitHub]
+
+<p align="center">
+  Built with ❤️ by ${repoData.owner}
+</p>
+
+Make it IMPRESSIVE and COMPLETE.
+Use emojis, tables, badges.
+Return ONLY markdown.`
       }
     ],
     max_tokens: 2048,

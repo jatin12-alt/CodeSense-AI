@@ -61,6 +61,36 @@ function simpleMarkdownToHtml(md: string) {
   return html
 }
 
+const renderMarkdown = (text: string) => {
+  return text.split('\n').map((line, i) => {
+    if (line.startsWith('# ')) 
+      return <h1 key={i} className="font-display font-bold text-2xl text-[#e8edf3] mt-6 mb-3">
+        {line.slice(2)}
+      </h1>
+    if (line.startsWith('## ')) 
+      return <h2 key={i} className="font-display font-bold text-xl text-[#e8edf3] mt-5 mb-2 border-b border-[rgba(255,255,255,0.07)] pb-2">
+        {line.slice(3)}
+      </h2>
+    if (line.startsWith('### ')) 
+      return <h3 key={i} className="font-display font-bold text-lg text-[#e8edf3] mt-4 mb-2">
+        {line.slice(4)}
+      </h3>
+    if (line.startsWith('- ') || line.startsWith('* ')) 
+      return <li key={i} className="font-mono text-sm text-[#e8edf3] ml-4 list-disc mb-1">
+        {line.slice(2)}
+      </li>
+    if (line.startsWith('```')) 
+      return <div key={i} className="font-mono text-xs bg-[rgba(255,255,255,0.03)] rounded px-2 py-0.5 text-[#00e5a0]">
+        {line}
+      </div>
+    if (line.trim() === '') 
+      return <br key={i} />
+    return <p key={i} className="font-mono text-sm text-[#e8edf3] mb-1">
+      {line}
+    </p>
+  })
+}
+
 export default function RepoOverviewPage() {
   const params = useParams()
   const repoId = (params?.repoId ?? '') as string
@@ -75,6 +105,8 @@ export default function RepoOverviewPage() {
 
   const [readme, setReadme] = useState('')
   const [generatingReadme, setGeneratingReadme] = useState(false)
+  const [readmeTab, setReadmeTab] = useState<'preview' | 'code'>('preview')
+  const [copied, setCopied] = useState(false)
 
   const canInteract = isLoaded && isSignedIn
 
@@ -161,6 +193,13 @@ export default function RepoOverviewPage() {
     } finally {
       setGeneratingReadme(false)
     }
+  }
+
+  const copyReadme = () => {
+    if (!readme) return
+    navigator.clipboard.writeText(readme)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const downloadReadme = () => {
@@ -379,24 +418,46 @@ export default function RepoOverviewPage() {
 
           {/* README section */}
           <div className="mt-8">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <h2 className="font-display font-bold text-2xl">Generated README</h2>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 {readme && (
                   <>
                     <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(readme)
-                      }}
-                      className="font-mono text-xs px-3 py-2 rounded-lg border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] text-[#6b7a8d] hover:text-white transition flex items-center gap-2"
+                      onClick={() => setReadmeTab('preview')}
+                      className={`font-mono text-xs px-3 py-1.5 rounded-lg border transition ${
+                        readmeTab === 'preview'
+                          ? 'border-[rgba(0,229,160,0.25)] bg-[rgba(0,229,160,0.10)] text-[#00e5a0]'
+                          : 'border-[rgba(255,255,255,0.07)] text-[#6b7a8d] hover:text-white'
+                      }`}
                     >
-                      <Copy size={13} /> Copy
+                      Preview
+                    </button>
+                    
+                    <button
+                      onClick={() => setReadmeTab('code')}
+                      className={`font-mono text-xs px-3 py-1.5 rounded-lg border transition ${
+                        readmeTab === 'code'
+                          ? 'border-[rgba(0,170,255,0.25)] bg-[rgba(0,170,255,0.10)] text-[#00aaff]'
+                          : 'border-[rgba(255,255,255,0.07)] text-[#6b7a8d] hover:text-white'
+                      }`}
+                    >
+                      {'<>'} Code
+                    </button>
+
+                    <div className="h-4 w-[1px] bg-[rgba(255,255,255,0.1)] mx-1" />
+
+                    <button
+                      onClick={copyReadme}
+                      className="font-mono text-xs px-3 py-1.5 rounded-lg border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] text-[#6b7a8d] hover:text-white transition flex items-center gap-2"
+                    >
+                      <Copy size={12} /> {copied ? 'Copied!' : 'Copy'}
                     </button>
                     <button
                       onClick={downloadReadme}
-                      className="font-mono text-xs px-3 py-2 rounded-lg border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] text-[#6b7a8d] hover:text-white transition flex items-center gap-2"
+                      className="font-mono text-xs px-3 py-1.5 rounded-lg border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.02)] text-[#6b7a8d] hover:text-white transition flex items-center gap-2"
                     >
-                      <Download size={13} /> Download
+                      <Download size={12} /> Download
                     </button>
                   </>
                 )}
@@ -407,27 +468,36 @@ export default function RepoOverviewPage() {
                <button
                   onClick={() => void generateReadme()}
                   disabled={!repo || generatingReadme}
-                  className="w-full font-mono text-sm px-6 py-4 rounded-2xl border border-[rgba(0,229,160,0.25)] bg-[rgba(0,229,160,0.08)] text-[#00e5a0] hover:bg-[rgba(0,229,160,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full font-display font-semibold text-sm px-6 py-4 rounded-2xl border border-[rgba(0,229,160,0.25)] bg-[rgba(0,229,160,0.08)] text-[#00e5a0] hover:bg-[rgba(0,229,160,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {generatingReadme ? <LoadingDots /> : (
                     <>
                       <FileText size={18} />
-                      {readme ? 'Regenerate README' : 'Generate README'}
+                      {readme ? 'Regenerate README — IMPRESSIVE Style' : 'Generate Professional README'}
                     </>
                   )}
                 </button>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] p-8 min-h-[200px] font-mono">
+            <div className="mt-4 rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#0f1520] min-h-[300px] overflow-hidden">
               {!readme ? (
-                <div className="font-mono text-sm text-[#6b7a8d] leading-7">
-                  Generate a professional README.md file based on your codebase structure and content.
+                <div className="font-mono text-sm text-[#6b7a8d] leading-7 p-8">
+                  Generate a high-quality README.md with badges, tech stack tables, and project structure.
                 </div>
               ) : (
-                <div
-                  className="prose prose-invert max-w-none font-mono text-[#e8edf3]"
-                  dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(readme) }}
-                />
+                <>
+                  {readmeTab === 'preview' ? (
+                    <div className="prose prose-invert max-w-none font-mono text-sm leading-7 p-8">
+                      {renderMarkdown(readme)}
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <pre className="font-mono text-[11px] text-[#e8edf3] p-8 overflow-auto max-h-[600px] leading-6 whitespace-pre-wrap selection:bg-[#00aaff]/30">
+                        {readme}
+                      </pre>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
