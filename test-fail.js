@@ -5,3 +5,4 @@ console.log("🚀 Testing Fixr Auto-Fix Pipeline...");
 if (true) {
   throw new Error("🔴 FIXR_TEST_FAILURE: AI should detect this and suggest a fix!");
 }
+// Fixr testing 
