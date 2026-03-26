@@ -1,1 +1,0 @@
-Check the test-fail.js file for syntax errors and fix them. Make sure that the file is properly formatted and that there are no missing or extra characters.
