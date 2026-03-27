@@ -4,6 +4,10 @@ import { Syne, DM_Mono } from 'next/font/google'
 import { Toaster } from '@/components/ui/toaster' 
 import './globals.css' 
   
+
+// Testing Fixr: Yeh invalid syntax build fail kar dega
+const testError = ;
+
 const syne = Syne({ 
   subsets: ['latin'], 
   weight: ['400', '600', '700', '800'], 
