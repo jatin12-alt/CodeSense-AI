@@ -1,7 +1,0 @@
-name: Test Failure
-on: [push]
-jobs:
-  fail-job:
-    runs-on: ubuntu-latest
-    steps:
-      - run: exit 1  # Yeh build ko fail kar dega
