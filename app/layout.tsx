@@ -6,7 +6,9 @@ import './globals.css'
   
 
 // Testing Fixr: Yeh invalid syntax build fail kar dega
+
 const testError = ;
+
 
 const syne = Syne({ 
   subsets: ['latin'], 
