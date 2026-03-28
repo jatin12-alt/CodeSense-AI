@@ -9,7 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run tests
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Run failing test
         run: |
-          echo "Running tests..."
-          exit 1
+          cat > test.js << 'EOF'
+          const fs = require('fs')
+          const data = JSON.prase('{"key": "value"}')
+          console.log(data)
+          EOF
+          node test.js
