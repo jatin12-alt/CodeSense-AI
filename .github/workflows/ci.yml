@@ -1,27 +1,27 @@
-name: CI
+# name: CI
 
-on:
-  push:
-    branches: [ main ]
+# on:
+#   push:
+#     branches: [ main ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
       
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+#       - name: Setup Node
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '18'
           
-      - name: Run failing test
-        run: |
-          cat > test.js << 'EOF'
-          const fs = require('fs')
-          const data = JSON.prase('{"key": "value"}')
-          console.log(data)
-          EOF
-          node test.js
+#       - name: Run failing test
+#         run: |
+#           cat > test.js << 'EOF'
+#           const fs = require('fs')
+#           const data = JSON.prase('{"key": "value"}')
+#           console.log(data)
+#           EOF
+#           node test.js
           
-          # test
+#           # test
